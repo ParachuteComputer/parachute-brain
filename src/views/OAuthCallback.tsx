@@ -1,33 +1,39 @@
 /**
- * /oauth/callback — completes the OAuth dance, then routes home (or back to
- * Connect on failure).
+ * /oauth/callback — completes the OAuth dance, refreshes the session state,
+ * then routes home (or back to Connect on failure).
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { surface } from "../data/surface";
+import { useSession } from "../data/SessionContext";
 import { Loader } from "../components/ui";
 
 export function OAuthCallback() {
   const navigate = useNavigate();
+  const { refresh } = useSession();
   const [error, setError] = useState<string | null>(null);
+  // The ?code in the URL is single-use — guard against double invocation
+  // (StrictMode re-runs effects in dev and would exchange it twice).
+  const ran = useRef(false);
 
   useEffect(() => {
-    let alive = true;
+    if (ran.current) return;
+    ran.current = true;
     surface
       .handleCallback()
       .then(() => {
-        if (alive) navigate("/", { replace: true });
+        // The token is stored now. Refresh the session BEFORE navigating —
+        // the signed-in gate otherwise still sees the stale pre-callback
+        // state and bounces to /connect (the "log in twice" bug).
+        refresh();
+        navigate("/", { replace: true });
       })
       .catch((e: unknown) => {
-        if (alive)
-          setError(
-            e instanceof Error ? e.message : "Sign-in could not be completed.",
-          );
+        setError(
+          e instanceof Error ? e.message : "Sign-in could not be completed.",
+        );
       });
-    return () => {
-      alive = false;
-    };
-  }, [navigate]);
+  }, [navigate, refresh]);
 
   if (error) {
     return (

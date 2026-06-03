@@ -20,19 +20,27 @@ interface Session {
   login: () => Promise<void>;
   logout: () => void;
   enterDemo: () => void;
+  /** Re-read the stored token — call after the OAuth callback completes. */
+  refresh: () => void;
 }
 
 const Ctx = createContext<Session | null>(null);
 
 export function SessionProvider({ children }: { children: ReactNode }) {
   const [demo, setDemoState] = useState(() => isDemo());
-  // Read the live token once at mount; we only flip this explicitly on
-  // logout. `login()` navigates the browser away, so it never needs to
-  // update state in place.
+  // Read the live token once at mount; flipped on logout, and re-read via
+  // refresh() after the OAuth callback stores a fresh token. (The callback is
+  // an SPA navigate — this provider does NOT remount — so without the refresh
+  // the signed-in gate still sees the stale pre-callback state and bounces
+  // back to /connect: the "have to log in twice" bug.)
   const [hasToken, setHasToken] = useState(() => surface.getClient() !== null);
 
   const login = useCallback(async () => {
     await surface.login();
+  }, []);
+
+  const refresh = useCallback(() => {
+    setHasToken(surface.getClient() !== null);
   }, []);
 
   const logout = useCallback(() => {
@@ -48,8 +56,15 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const value = useMemo<Session>(
-    () => ({ signedIn: demo || hasToken, demo, login, logout, enterDemo }),
-    [demo, hasToken, login, logout, enterDemo],
+    () => ({
+      signedIn: demo || hasToken,
+      demo,
+      login,
+      logout,
+      enterDemo,
+      refresh,
+    }),
+    [demo, hasToken, login, logout, enterDemo, refresh],
   );
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;

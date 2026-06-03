@@ -3,6 +3,7 @@
  * Kept component-free so React Fast Refresh stays happy.
  */
 import type { CSSProperties } from "react";
+import { isDemo } from "../data/vault";
 
 /** Humanize an enum label: in-progress → In progress. */
 export function label(s?: string): string {
@@ -29,12 +30,15 @@ export function fmtDateShort(iso?: string): string {
 }
 
 /**
- * Today's date as the vault stores it (YYYY-MM-DD). Pinned to the demo seed
- * date so the daily-summary surfaces in demo mode; against a live vault this
- * is the date the daily note is keyed by.
+ * Today's date as the vault keys it (YYYY-MM-DD, local time). Demo mode pins
+ * to the fixture seed date so the demo daily-summary still surfaces.
  */
 export function todayISO(): string {
-  return "2026-06-02";
+  if (isDemo()) return "2026-06-02";
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
 }
 
 /** Stagger delay for fade-up list entrances. */
