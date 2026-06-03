@@ -11,4 +11,7 @@ export const surface = createVaultSurface({
   clientName: "Parachute Brain",
   hubUrl: "https://our.parachute.computer",
   vaultName: "default",
+  // Base-aware so the callback is correct both at root (dev) and at the
+  // GitHub Pages project path (https://…/parachute-brain/oauth/callback).
+  redirectUri: `${window.location.origin}${import.meta.env.BASE_URL}oauth/callback`,
 });

@@ -1,0 +1,15 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Parachute Brain</title>
+    <script>
+      // SPA fallback for GitHub Pages project pages: stash the requested URL
+      // (path + query, e.g. the OAuth /oauth/callback?code=…) and bounce to the
+      // app entry, which restores it in main.tsx before the router mounts.
+      sessionStorage.setItem("spa-redirect", location.href);
+      location.replace("/parachute-brain/");
+    </script>
+  </head>
+  <body></body>
+</html>
