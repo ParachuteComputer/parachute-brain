@@ -3,12 +3,11 @@
  *  - linkComponent  → a react-router <Link> adapter (client-side nav)
  *  - resolve        → maps [[wikilink]] → our /n/<path> route
  *  - fetchBlob      → auth'd media via the live VaultClient (null in demo)
- *  - rehypeHighlight for fenced code
+ *  - fenced code renders plain (escape-only; no highlight.js → lighter bundle)
  */
 import { Link } from "react-router-dom";
 import { NoteRenderer } from "@openparachute/surface-render/note";
 import { useVaultFetchBlob } from "@openparachute/surface-render/embed";
-import rehypeHighlight from "rehype-highlight";
 import type { Note } from "@openparachute/surface-client";
 import { surface } from "../data/surface";
 import { isDemo } from "../data/vault";
@@ -78,7 +77,6 @@ export function NoteBody({
       linkComponent={linkComponent}
       resolve={resolveWikilink}
       fetchBlob={fetchBlob}
-      rehypePlugins={[rehypeHighlight]}
     />
   );
 }

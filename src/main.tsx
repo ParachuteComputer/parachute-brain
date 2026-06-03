@@ -4,7 +4,6 @@ import { BrowserRouter } from "react-router-dom";
 import { App } from "./App";
 import { ThemeProvider } from "./components/ThemeContext";
 import { SessionProvider } from "./data/SessionContext";
-import "highlight.js/styles/github.css";
 import "./styles.css";
 
 // GitHub Pages has no server-side SPA routing: a deep link (or the OAuth
