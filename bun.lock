@@ -6,7 +6,7 @@
       "name": "parachute-brain",
       "dependencies": {
         "@openparachute/surface-client": "0.2.0",
-        "@openparachute/surface-render": "0.1.0",
+        "@openparachute/surface-render": "0.2.0",
         "react": "^19.2.6",
         "react-dom": "^19.2.6",
         "react-markdown": "^10.1.0",
@@ -109,7 +109,7 @@
 
     "@openparachute/surface-client": ["@openparachute/surface-client@0.2.0", "", { "peerDependencies": { "typescript": "^5" } }, "sha512-SC2czbj+wiArCTm0//P7vDJDte92EEkqZjRI5jzKJ2i7T86CjWMW33kJH3wH6HO9CwoCtyeZELpgXm9WWV5bFA=="],
 
-    "@openparachute/surface-render": ["@openparachute/surface-render@0.1.0", "", { "dependencies": { "@openparachute/surface-client": "^0.2.0" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19", "react-markdown": "^9 || ^10", "rehype-highlight": "^7", "remark-gfm": "^4" }, "optionalPeers": ["rehype-highlight"] }, "sha512-5xCBbW+d/+8lkUGbsZ5k8O1hOO4z9QkESHSnVdmrAe4G43sr/cax6a8y+ba1xJnuDwndWNDOrkEe9r8HJnHKEA=="],
+    "@openparachute/surface-render": ["@openparachute/surface-render@0.2.0", "", { "dependencies": { "@openparachute/surface-client": "^0.2.0" }, "peerDependencies": { "react": "^18 || ^19", "react-dom": "^18 || ^19", "react-markdown": "^9 || ^10", "rehype-highlight": "^7", "remark-gfm": "^4" }, "optionalPeers": ["rehype-highlight"] }, "sha512-I/GIpTqyBgeB3G32T77zcuMfKur1jlrMdzXWx0rlOY4cMqdfOV93SJlJllTTFMkzjYzU0l5zAozZJTFDkpWNdw=="],
 
     "@oxc-project/types": ["@oxc-project/types@0.133.0", "", {}, "sha512-KzkdCd6Uxqnf6l3HOw1xfatAlUURA0g14cvBYFyJ5SaNOQbOUvBr9PKArcPcrNIeRsBdgcUzOGrhKveVpvOIGA=="],
 
