@@ -64,8 +64,7 @@ export function NoteBody({
   stripLeadingH1?: boolean;
 }) {
   const client = isDemo() ? null : surface.getClient();
-  // surface-render 0.2.0: memoized hook over vaultClientFetchBlob — returns
-  // undefined when signed out (demo / not connected).
+  // Memoized; returns undefined when there's no client (demo / signed-out).
   const fetchBlob = useVaultFetchBlob(client);
 
   const rendered =
