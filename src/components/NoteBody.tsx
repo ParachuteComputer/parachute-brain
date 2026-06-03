@@ -7,7 +7,7 @@
  */
 import { Link } from "react-router-dom";
 import { NoteRenderer } from "@openparachute/surface-render/note";
-import { vaultClientFetchBlob } from "@openparachute/surface-render/embed";
+import { useVaultFetchBlob } from "@openparachute/surface-render/embed";
 import rehypeHighlight from "rehype-highlight";
 import type { Note } from "@openparachute/surface-client";
 import { surface } from "../data/surface";
@@ -64,7 +64,8 @@ export function NoteBody({
   stripLeadingH1?: boolean;
 }) {
   const client = isDemo() ? null : surface.getClient();
-  const fetchBlob = client ? vaultClientFetchBlob(client) : undefined;
+  // Memoized; returns undefined when there's no client (demo / signed-out).
+  const fetchBlob = useVaultFetchBlob(client);
 
   const rendered =
     stripLeadingH1 && typeof note.content === "string"
@@ -76,7 +77,7 @@ export function NoteBody({
       note={rendered}
       linkComponent={linkComponent}
       resolve={resolveWikilink}
-      fetchBlob={fetchBlob ?? undefined}
+      fetchBlob={fetchBlob}
       rehypePlugins={[rehypeHighlight]}
     />
   );
