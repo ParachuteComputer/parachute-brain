@@ -93,7 +93,6 @@ export function Meetings() {
                     <Link
                       to={noteHref(m.path)}
                       className="card card-hover card-pad"
-                      style={{ display: "block" }}
                     >
                       <div
                         className="row-meta"
