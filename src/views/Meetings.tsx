@@ -2,12 +2,13 @@
  * Meetings — a timeline by held_on, grouped by series; status badge.
  * Click → meeting detail (digest + produced decisions / spawned work).
  */
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useNotes } from "../data/useNotes";
 import { toMeeting } from "../data/model";
 import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
+import { AddMeetingModal } from "../components/AddMeetingModal";
 import { MEETING_SERIES, meetingStatusTint } from "../data/schema";
 import { label, fmtDate, noteHref, staggerStyle } from "../lib/format";
 
@@ -20,6 +21,8 @@ const SERIES_LABEL: Record<string, string> = {
 };
 
 export function Meetings() {
+  const [adding, setAdding] = useState(false);
+  const navigate = useNavigate();
   const { data, loading, error } = useNotes({
     tag: "meeting",
     include_metadata: "true",
@@ -53,6 +56,20 @@ export function Meetings() {
         eyebrow="When we gathered"
         title="Meetings"
         lead="A timeline of where the conversations happened — and what they produced."
+      />
+
+      <div className="page-actions">
+        <button type="button" className="btn" onClick={() => setAdding(true)}>
+          + Add meeting
+        </button>
+      </div>
+      <AddMeetingModal
+        open={adding}
+        onClose={() => setAdding(false)}
+        onCreated={(p) => {
+          setAdding(false);
+          navigate(noteHref(p));
+        }}
       />
 
       {activeSeries.length === 0 ? (
