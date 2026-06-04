@@ -84,6 +84,16 @@ export const FEEDBACK_STATUSES = [
 ] as const;
 export type FeedbackStatus = (typeof FEEDBACK_STATUSES)[number];
 
+export const FEEDBACK_SOURCES = [
+  "direct",
+  "email",
+  "meeting",
+  "github",
+  "beta-form",
+  "support",
+] as const;
+export type FeedbackSource = (typeof FEEDBACK_SOURCES)[number];
+
 export const FEEDBACK_CATEGORIES = [
   "bug",
   "dx-gap",
