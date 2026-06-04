@@ -650,6 +650,39 @@ export const DAILY: Note[] = [
   ),
 ];
 
+// -------------------------------------------------------------- Strategy ----
+// Generic placeholders only — demo mode ships in the public bundle, so no
+// real fundraising numbers belong here.
+
+export const STRATEGY: Note[] = [
+  note(
+    "demo-strategy-1",
+    "Strategy/business-plan",
+    ["strategy"],
+    {
+      kind: "business-plan",
+      status: "draft",
+      summary:
+        "Draft v1 — what we sell, the round, use of funds, unit economics, milestones. Assumptions register awaiting confirmation.",
+    },
+    "# Business Plan\n\n**DRAFT v1.** What we sell → the raise → use of funds → unit economics → revenue path → milestones → risks. Numbers in the assumptions register are placeholders awaiting confirmation.",
+    "2026-06-01T16:00:00Z",
+  ),
+  note(
+    "demo-strategy-2",
+    "Strategy/positioning",
+    ["strategy"],
+    {
+      kind: "positioning",
+      status: "active",
+      summary:
+        "The wedge: your AI keeps forgetting; Parachute is the user-owned memory layer underneath all of them.",
+    },
+    "# Positioning\n\nInteroperable, intuitive, integrated. The user-owned memory & knowledge layer for humans and their AI — the spine, not another silo.",
+    "2026-05-28T12:00:00Z",
+  ),
+];
+
 // ----------------------------------------------------------------- index ----
 
 export const ALL_NOTES: Note[] = [
@@ -657,6 +690,7 @@ export const ALL_NOTES: Note[] = [
   ...ORGS,
   ...WORK,
   ...DECISIONS,
+  ...STRATEGY,
   ...MEETINGS,
   ...FEEDBACK_THEMES,
   ...FEEDBACK_CAPTURES,

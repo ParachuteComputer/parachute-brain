@@ -51,6 +51,7 @@ export const MEETING_SERIES = [
   "techne-lca",
   "gamescoop-friday",
   "gitcoin-sync",
+  "fundraising",
   "ad-hoc",
 ] as const;
 export type MeetingSeries = (typeof MEETING_SERIES)[number];
@@ -62,6 +63,17 @@ export const MEETING_STATUSES = [
   "governed",
 ] as const;
 export type MeetingStatus = (typeof MEETING_STATUSES)[number];
+
+export const STRATEGY_KINDS = [
+  "business-plan",
+  "fundraising",
+  "positioning",
+  "product-direction",
+] as const;
+export type StrategyKind = (typeof STRATEGY_KINDS)[number];
+
+export const STRATEGY_STATUSES = ["draft", "active", "superseded"] as const;
+export type StrategyStatus = (typeof STRATEGY_STATUSES)[number];
 
 export const FEEDBACK_STATUSES = [
   "open",
@@ -105,6 +117,8 @@ export const REPOS = [
   "parachute-runner",
   "parachute-patterns",
   "parachute.computer",
+  "parachute-brain",
+  "parachute-workspace",
 ] as const;
 export type Repo = (typeof REPOS)[number];
 
@@ -153,6 +167,12 @@ export interface Meeting extends BaseEntity {
   series?: MeetingSeries;
   heldOn?: string;
   status?: MeetingStatus;
+}
+
+export interface Strategy extends BaseEntity {
+  kind?: StrategyKind;
+  status?: StrategyStatus;
+  supersedes?: string;
 }
 
 export interface FeedbackTheme extends BaseEntity {
@@ -244,6 +264,34 @@ export function decisionTint(s?: DecisionStatus): Tint {
       return "stone";
     case "reversed":
       return "terracotta";
+    default:
+      return "stone";
+  }
+}
+
+export function strategyStatusTint(s?: StrategyStatus): Tint {
+  switch (s) {
+    case "active":
+      return "forest";
+    case "draft":
+      return "sky";
+    case "superseded":
+      return "stone";
+    default:
+      return "stone";
+  }
+}
+
+export function strategyKindTint(k?: StrategyKind): Tint {
+  switch (k) {
+    case "business-plan":
+      return "sky";
+    case "fundraising":
+      return "lavender";
+    case "positioning":
+      return "amber";
+    case "product-direction":
+      return "forest";
     default:
       return "stone";
   }
@@ -351,6 +399,8 @@ const REPO_COLORS: Record<Repo, string> = {
   "parachute-runner": "#9c5a4a",
   "parachute-patterns": "#5a8a6e",
   "parachute.computer": "#6b7a9e",
+  "parachute-brain": "#8a6e5a",
+  "parachute-workspace": "#6e7a8a",
 };
 export function repoColor(repo: string): string {
   return (REPO_COLORS as Record<string, string>)[repo] ?? "#9a9690";
