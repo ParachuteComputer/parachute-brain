@@ -17,17 +17,7 @@ import {
 import { createPortal } from "react-dom";
 import { createNote, isDemo } from "../data/vault";
 import { MEETING_SERIES } from "../data/schema";
-import { label, todayISO } from "../lib/format";
-
-function slugify(s: string): string {
-  return (
-    s
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 60) || "meeting"
-  );
-}
+import { label, slugify, todayISO } from "../lib/format";
 
 export function AddMeetingModal({
   open,
@@ -90,7 +80,7 @@ export function AddMeetingModal({
     setBusy(true);
     setError(null);
     try {
-      const slug = slugify(title);
+      const slug = slugify(title, "meeting");
       const meetingPath = `Meetings/${date}-${slug}`;
       const transcriptPath = `${meetingPath}/transcript`;
       // The raw transcript first — a sacred capture, verbatim.
