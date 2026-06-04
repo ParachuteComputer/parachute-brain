@@ -1348,3 +1348,13 @@ button.row {
   color: var(--tint-terracotta-fg, #a4543a);
   margin-right: auto;
 }
+
+/* --- Error recovery actions --- */
+.inline-error-msg {
+  margin-top: 0;
+  margin-bottom: 12px;
+}
+.inline-error-actions {
+  display: flex;
+  gap: 10px;
+}

@@ -4,6 +4,7 @@
  */
 import type { ReactNode } from "react";
 import { ParachuteLogo } from "./ParachuteLogo";
+import { useSession } from "../data/SessionContext";
 import {
   avatarColor,
   initials,
@@ -107,6 +108,35 @@ export function Empty({
   );
 }
 
+/**
+ * Error state with recovery. Transient blips (a hub restart reads as the
+ * browser's literal "Failed to fetch") get "Try again"; a dead session gets
+ * "Reconnect" — re-runs the OAuth bounce, which the hub fast-tracks when the
+ * consent session is still alive. No manual sign-out needed for either.
+ */
 export function ErrorBox({ message }: { message: string }) {
-  return <div className="inline-error">{message}</div>;
+  const { demo, login } = useSession();
+  // Case-insensitive contains — the literal browser string isn't spec'd.
+  const friendly = /failed to fetch/i.test(message)
+    ? "Couldn't reach the vault — it may have blinked (a restart or a dropped connection)."
+    : message;
+  return (
+    <div className="inline-error" role="alert">
+      <p className="inline-error-msg">{friendly}</p>
+      <div className="inline-error-actions">
+        <button
+          type="button"
+          className="btn btn-ghost"
+          onClick={() => window.location.reload()}
+        >
+          Try again
+        </button>
+        {!demo && (
+          <button type="button" className="btn" onClick={() => void login()}>
+            Reconnect
+          </button>
+        )}
+      </div>
+    </div>
+  );
 }
