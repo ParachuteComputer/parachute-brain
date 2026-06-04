@@ -221,6 +221,24 @@ export async function createNote(payload: CreateNotePayload): Promise<Note> {
   return client.createNote(payload);
 }
 
+/**
+ * Add graph links to a note. surface-client's UpdateNotePayload doesn't type
+ * `links` yet (package gap — the vault REST PATCH accepts `links.add`, same
+ * shape the MCP exposes), so this helper owns the cast until it does.
+ */
+export async function addNoteLinks(
+  id: string,
+  links: { target: string; relationship: string }[],
+): Promise<void> {
+  if (isDemo()) return; // demo notes aren't persisted; nothing to link
+  const client = getLiveClient();
+  if (!client) throw new Error("Not signed in");
+  await client.updateNote(id, {
+    links: { add: links },
+    force: true,
+  } as unknown as UpdateNotePayload);
+}
+
 export async function updateNote(
   id: string,
   payload: UpdateNotePayload,

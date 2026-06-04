@@ -3,12 +3,13 @@
  * raw captures feed them. Category + severity pills. Click a theme → detail
  * showing its raw captures + the work it drives.
  */
-import { useMemo } from "react";
-import { Link } from "react-router-dom";
+import { useMemo, useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { useNotes } from "../data/useNotes";
 import { toFeedbackCapture, toFeedbackTheme } from "../data/model";
 import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
+import { AddFeedbackModal } from "../components/AddFeedbackModal";
 import {
   FEEDBACK_STATUSES,
   categoryTint,
@@ -21,6 +22,8 @@ import { label, noteHref, staggerStyle } from "../lib/format";
 const SEV_RANK: Record<string, number> = { p0: 0, p1: 1, p2: 2 };
 
 export function Feedback() {
+  const [adding, setAdding] = useState(false);
+  const navigate = useNavigate();
   const themes = useNotes({
     tag: "feedback-theme",
     include_metadata: "true",
@@ -78,6 +81,20 @@ export function Feedback() {
         eyebrow="What we're hearing"
         title="Feedback"
         lead="Themes distilled from the raw captures, grouped by where we are with them — most urgent first."
+      />
+
+      <div className="page-actions">
+        <button type="button" className="btn" onClick={() => setAdding(true)}>
+          + Add feedback
+        </button>
+      </div>
+      <AddFeedbackModal
+        open={adding}
+        onClose={() => setAdding(false)}
+        onCreated={(p) => {
+          setAdding(false);
+          navigate(noteHref(p));
+        }}
       />
 
       {activeStatuses.length === 0 ? (
