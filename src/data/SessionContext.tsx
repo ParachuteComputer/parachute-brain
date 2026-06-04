@@ -1,7 +1,8 @@
 /**
- * Session context: holds the signed-in state (live token or demo) without
- * rebuilding the VaultClient per render. `surface.getClient()` is read once
- * into a ref; we only re-derive when the identity changes (sign in/out).
+ * Session context: holds the signed-in state (live session or demo).
+ * Signed-in means hasStoredSession() — session material exists, even if the
+ * access token is expired (the live client refreshes it on first use).
+ * Re-derived on logout and via refresh() after the OAuth callback.
  */
 import {
   createContext,

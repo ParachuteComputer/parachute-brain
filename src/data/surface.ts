@@ -61,6 +61,10 @@ function ensureClientIdSeeded(): void {
   try {
     const raw = window.localStorage.getItem(DCR_CACHE_KEY);
     if (!raw) return;
+    // Assumes the cached registration matches HUB_URL + the current redirect
+    // URI (true for this app's fixed constants). If the hub origin ever
+    // migrates, a stale cache yields a wrong client_id → the refresh 401s
+    // and falls through to signed-out — recoverable via Reconnect.
     const cached = JSON.parse(raw) as { clientId?: string };
     if (!cached.clientId) return;
     const stored = loadToken(APP_NAME, VAULT_NAME);
@@ -93,9 +97,11 @@ function singleFlightRefresh(): Promise<string | null> {
         VAULT_NAME,
       );
       return token.access_token;
-    } catch {
+    } catch (e) {
       // Genuine refresh failure (revoked family, hub down): report
-      // signed-out; the ErrorBox offers Reconnect.
+      // signed-out; the ErrorBox offers Reconnect. Logged for diagnosis —
+      // silent auth failures cost us days on this class of bug.
+      console.error("[parachute-brain] token refresh failed:", e);
       return null;
     } finally {
       refreshInFlight = null;
