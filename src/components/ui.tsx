@@ -116,12 +116,12 @@ export function Empty({
  */
 export function ErrorBox({ message }: { message: string }) {
   const { demo, login } = useSession();
-  const friendly =
-    message === "Failed to fetch"
-      ? "Couldn't reach the vault — it may have blinked (a restart or a dropped connection)."
-      : message;
+  // Case-insensitive contains — the literal browser string isn't spec'd.
+  const friendly = /failed to fetch/i.test(message)
+    ? "Couldn't reach the vault — it may have blinked (a restart or a dropped connection)."
+    : message;
   return (
-    <div className="inline-error">
+    <div className="inline-error" role="alert">
       <p className="inline-error-msg">{friendly}</p>
       <div className="inline-error-actions">
         <button

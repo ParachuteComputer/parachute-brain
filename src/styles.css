@@ -1351,6 +1351,7 @@ button.row {
 
 /* --- Error recovery actions --- */
 .inline-error-msg {
+  margin-top: 0;
   margin-bottom: 12px;
 }
 .inline-error-actions {
