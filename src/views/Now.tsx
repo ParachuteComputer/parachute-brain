@@ -19,7 +19,7 @@ const ACTIVE = JSON.stringify({
 const SHIPPED = JSON.stringify({ status: { eq: "shipped" } });
 
 function touched(n: Note): string {
-  return n.updatedAt ?? n.createdAt;
+  return n.updatedAt ?? n.createdAt ?? "";
 }
 
 export function Now() {

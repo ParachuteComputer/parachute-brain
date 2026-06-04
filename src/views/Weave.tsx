@@ -56,6 +56,9 @@ export function Weave() {
         // blank beats wrong, so unknowns are set to "" deliberately and show
         // up as needs-triage rather than silently miscategorized.
         const name = (p.entityName ?? "entity").trim();
+        // Display-name paths (People/Orgs) keep spaces but must not nest:
+        // a slash in a name would silently create sub-paths.
+        const safeName = name.replace(/[\\/]+/g, "-");
         const slug = slugify(name, "entity");
         const m = (p.note.metadata ?? {}) as Record<string, unknown>;
         const entitySummary =
@@ -66,18 +69,18 @@ export function Weave() {
         // source meeting's path), else today.
         const evDate =
           (p.evidence ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? todayISO();
-        let path = `Entities/${name}`;
+        let path = `Entities/${safeName}`;
         let metadata: Record<string, unknown> = {
           summary: entitySummary ?? p.evidence ?? "",
         };
         switch (p.entityType) {
           case "person":
-            path = `People/${name}`;
+            path = `People/${safeName}`;
             // "user" per the team philosophy: ideally everyone is a user.
             metadata = { ...metadata, relation: "user", role: "", handle: "" };
             break;
           case "org":
-            path = `Orgs/${name}`;
+            path = `Orgs/${safeName}`;
             metadata = { ...metadata, kind: "", affiliation: "" };
             break;
           case "work":
