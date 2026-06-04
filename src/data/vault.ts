@@ -13,7 +13,7 @@ import type {
   UpdateNotePayload,
   CreateNotePayload,
 } from "@openparachute/surface-client";
-import { surface } from "./surface";
+import { getLiveClient } from "./surface";
 import { ALL_NOTES } from "../demo/fixtures";
 
 const DEMO_KEY = "pb:demo";
@@ -184,7 +184,7 @@ function sortKey(n: Note, field: string): string | number {
 
 export async function queryNotes(params: QueryParams): Promise<Note[]> {
   if (isDemo()) return demoQuery(params);
-  const client = surface.getClient();
+  const client = getLiveClient();
   if (!client) throw new Error("Not signed in");
   return client.queryNotes(params as Record<string, string>);
 }
@@ -199,7 +199,7 @@ export async function getNote(
     );
     return n ? { ...n } : null;
   }
-  const client = surface.getClient();
+  const client = getLiveClient();
   if (!client) throw new Error("Not signed in");
   return client.getNote(idOrPath, opts);
 }
@@ -216,7 +216,7 @@ export async function createNote(payload: CreateNotePayload): Promise<Note> {
       createdAt: new Date().toISOString(),
     };
   }
-  const client = surface.getClient();
+  const client = getLiveClient();
   if (!client) throw new Error("Not signed in");
   return client.createNote(payload);
 }
@@ -244,7 +244,7 @@ export async function updateNote(
     }
     return merged;
   }
-  const client = surface.getClient();
+  const client = getLiveClient();
   if (!client) throw new Error("Not signed in");
   return client.updateNote(id, payload);
 }
