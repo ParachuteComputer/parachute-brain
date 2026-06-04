@@ -1,7 +1,8 @@
 /**
- * Session context: holds the signed-in state (live token or demo) without
- * rebuilding the VaultClient per render. `surface.getClient()` is read once
- * into a ref; we only re-derive when the identity changes (sign in/out).
+ * Session context: holds the signed-in state (live session or demo).
+ * Signed-in means hasStoredSession() — session material exists, even if the
+ * access token is expired (the live client refreshes it on first use).
+ * Re-derived on logout and via refresh() after the OAuth callback.
  */
 import {
   createContext,
@@ -11,7 +12,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
-import { surface } from "./surface";
+import { hasStoredSession, surface } from "./surface";
 import { isDemo, setDemo } from "./vault";
 
 interface Session {
@@ -33,14 +34,17 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   // an SPA navigate — this provider does NOT remount — so without the refresh
   // the signed-in gate still sees the stale pre-callback state and bounces
   // back to /connect: the "have to log in twice" bug.)
-  const [hasToken, setHasToken] = useState(() => surface.getClient() !== null);
+  // hasStoredSession, NOT getClient(): an expired-but-refreshable token is
+  // still a session — the live client refreshes it on first use. Treating
+  // "expired" as "signed out" is what bounced every return visit to /connect.
+  const [hasToken, setHasToken] = useState(() => hasStoredSession());
 
   const login = useCallback(async () => {
     await surface.login();
   }, []);
 
   const refresh = useCallback(() => {
-    setHasToken(surface.getClient() !== null);
+    setHasToken(hasStoredSession());
   }, []);
 
   const logout = useCallback(() => {

@@ -9,7 +9,7 @@ import { Link } from "react-router-dom";
 import { NoteRenderer } from "@openparachute/surface-render/note";
 import { useVaultFetchBlob } from "@openparachute/surface-render/embed";
 import type { Note } from "@openparachute/surface-client";
-import { surface } from "../data/surface";
+import { getLiveClient } from "../data/surface";
 import { isDemo } from "../data/vault";
 
 const linkComponent = ({
@@ -62,7 +62,7 @@ export function NoteBody({
   note: Note;
   stripLeadingH1?: boolean;
 }) {
-  const client = isDemo() ? null : surface.getClient();
+  const client = isDemo() ? null : getLiveClient();
   // Memoized; returns undefined when there's no client (demo / signed-out).
   const fetchBlob = useVaultFetchBlob(client);
 
