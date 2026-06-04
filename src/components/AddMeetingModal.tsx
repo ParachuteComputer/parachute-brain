@@ -14,6 +14,7 @@ import {
   useState,
   type ChangeEvent,
 } from "react";
+import { createPortal } from "react-dom";
 import { createNote, isDemo } from "../data/vault";
 import { MEETING_SERIES } from "../data/schema";
 import { label, todayISO } from "../lib/format";
@@ -55,6 +56,17 @@ export function AddMeetingModal({
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [open, onClose]);
+
+  // Lock the page scroll while the modal is open (otherwise the page behind
+  // scrolls under the overlay — "strange scrolling").
+  useEffect(() => {
+    if (!open) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [open]);
 
   if (!open) return null;
 
@@ -102,7 +114,11 @@ export function AddMeetingModal({
     }
   }
 
-  return (
+  // Portal to <body>: ancestors keep a `transform` after their fade-up
+  // entrance (fill-mode: both), and a transformed ancestor becomes the
+  // containing block for position:fixed — without the portal the overlay
+  // renders as a displaced shaded box instead of covering the viewport.
+  return createPortal(
     <div className="modal-overlay" onClick={onClose}>
       <div
         className="modal"
@@ -201,6 +217,7 @@ export function AddMeetingModal({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
 }
