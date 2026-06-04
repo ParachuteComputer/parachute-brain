@@ -22,6 +22,9 @@ import type {
   ProposalStatus,
   Relation,
   Repo,
+  Strategy,
+  StrategyKind,
+  StrategyStatus,
   Work,
   WorkKind,
   WorkStatus,
@@ -124,6 +127,16 @@ export function toDecision(n: Note): Decision {
     decidedOn: str(m.decided_on),
     supersedes: str(m.supersedes),
     supersededBy: str(m.superseded_by),
+  };
+}
+
+export function toStrategy(n: Note): Strategy {
+  const m = meta(n);
+  return {
+    ...base(n),
+    kind: str(m.kind) as StrategyKind | undefined,
+    status: str(m.status) as StrategyStatus | undefined,
+    supersedes: str(m.supersedes),
   };
 }
 

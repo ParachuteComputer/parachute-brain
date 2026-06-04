@@ -17,6 +17,7 @@ const SERIES_LABEL: Record<string, string> = {
   "techne-lca": "Techne · LCA",
   "gamescoop-friday": "Gamescoop Friday",
   "gitcoin-sync": "Gitcoin Sync",
+  fundraising: "Fundraising",
   "ad-hoc": "Ad hoc",
 };
 

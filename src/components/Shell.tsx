@@ -12,6 +12,7 @@ const NAV = [
   { to: "/now", label: "Now" },
   { to: "/work", label: "Work" },
   { to: "/decisions", label: "Decisions" },
+  { to: "/strategy", label: "Strategy" },
   { to: "/feedback", label: "Feedback" },
   { to: "/meetings", label: "Meetings" },
   { to: "/team", label: "Team" },
