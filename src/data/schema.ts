@@ -132,6 +132,32 @@ export const REPOS = [
 ] as const;
 export type Repo = (typeof REPOS)[number];
 
+// kind = WHAT IT IS; role = the commitment level; status = lifecycle.
+// These three axes are the whole point of the Modules view: a docs repo and a
+// platform module both "live", but they're different *kinds* of thing.
+export const MODULE_KINDS = ["module", "app", "docs", "site", "library"] as const;
+export type ModuleKind = (typeof MODULE_KINDS)[number];
+
+export const MODULE_ROLES = [
+  "committed-core",
+  "shipped-not-promoted",
+  "core-support",
+  "internal-tooling",
+  "exploration",
+  "archived",
+  "retired",
+] as const;
+export type ModuleRole = (typeof MODULE_ROLES)[number];
+
+export const MODULE_STATUSES = [
+  "live",
+  "beta",
+  "wip",
+  "archiving",
+  "retired",
+] as const;
+export type ModuleStatus = (typeof MODULE_STATUSES)[number];
+
 // ---- domain projections ----
 
 export interface BaseEntity {
@@ -209,6 +235,15 @@ export interface Proposal extends BaseEntity {
 
 export interface DailySummary extends BaseEntity {
   date?: string;
+}
+
+export interface Module extends BaseEntity {
+  kind?: ModuleKind;
+  role?: ModuleRole;
+  status?: ModuleStatus;
+  repoSlug?: string;
+  npm: string[];
+  port?: string;
 }
 
 // ---- semantic-tint mapping (gentle; never loud) ----
@@ -374,6 +409,43 @@ export function proposalTint(s?: ProposalStatus): Tint {
       return "terracotta";
     default:
       return "sky";
+  }
+}
+
+export function moduleRoleTint(r?: ModuleRole): Tint {
+  switch (r) {
+    case "committed-core":
+      return "forest";
+    case "shipped-not-promoted":
+      return "sky";
+    case "core-support":
+      return "lavender";
+    case "internal-tooling":
+      return "stone";
+    case "exploration":
+      return "amber";
+    case "archived":
+    case "retired":
+      return "terracotta";
+    default:
+      return "stone";
+  }
+}
+
+export function moduleStatusTint(s?: ModuleStatus): Tint {
+  switch (s) {
+    case "live":
+      return "forest";
+    case "beta":
+      return "sky";
+    case "wip":
+      return "amber";
+    case "archiving":
+      return "stone";
+    case "retired":
+      return "terracotta";
+    default:
+      return "stone";
   }
 }
 

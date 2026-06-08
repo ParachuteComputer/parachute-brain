@@ -15,6 +15,10 @@ import type {
   Meeting,
   MeetingSeries,
   MeetingStatus,
+  Module,
+  ModuleKind,
+  ModuleRole,
+  ModuleStatus,
   Org,
   Person,
   Priority,
@@ -168,6 +172,19 @@ export function toFeedbackCapture(n: Note): FeedbackCapture {
     source: str(m.source),
     reporter: str(m.reporter),
     theme: str(m.theme),
+  };
+}
+
+export function toModule(n: Note): Module {
+  const m = meta(n);
+  return {
+    ...base(n),
+    kind: str(m.kind) as ModuleKind | undefined,
+    role: str(m.role) as ModuleRole | undefined,
+    status: str(m.status) as ModuleStatus | undefined,
+    repoSlug: str(m.repo_slug),
+    npm: strArr(m.npm) ?? [],
+    port: str(m.port),
   };
 }
 
