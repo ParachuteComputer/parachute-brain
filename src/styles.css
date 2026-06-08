@@ -767,6 +767,88 @@ button.row {
   flex-shrink: 0;
 }
 
+/* --- Module cards (Modules / canon registry) --- */
+.module-card {
+  padding: 18px 20px;
+  display: flex;
+  flex-direction: column;
+}
+.module-card-head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 11px;
+}
+.module-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.module-name {
+  font-size: 1.08rem;
+  font-weight: 500;
+  line-height: 1.2;
+  color: var(--fg);
+}
+.module-pills {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 11px;
+}
+.module-kind-chip {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+  text-transform: uppercase;
+}
+.module-summary {
+  font-size: 0.9rem;
+  color: var(--fg-muted);
+  line-height: 1.55;
+  margin-bottom: 14px;
+}
+.module-links {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+  margin-top: auto;
+}
+.module-repo-link,
+.module-npm-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 2px 9px 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--bg);
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+  transition: border-color var(--ease), color var(--ease);
+}
+.module-repo-link:hover,
+.module-npm-chip:hover {
+  border-color: var(--accent);
+  color: var(--fg);
+}
+.module-npm-mark {
+  font-weight: 600;
+  color: #cb3837;
+}
+.module-port {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  color: var(--fg-dim);
+  padding: 2px 4px;
+}
+
 /* --- Weave queue --- */
 .weave-card {
   padding: 20px 22px;

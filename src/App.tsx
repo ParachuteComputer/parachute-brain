@@ -16,6 +16,7 @@ import { Now } from "./views/Now";
 import { Work } from "./views/Work";
 import { Decisions } from "./views/Decisions";
 import { Strategy } from "./views/Strategy";
+import { Modules } from "./views/Modules";
 import { Feedback } from "./views/Feedback";
 import { Meetings } from "./views/Meetings";
 import { Team } from "./views/Team";
@@ -37,6 +38,7 @@ export function App() {
           <Route path="work" element={<Work />} />
           <Route path="decisions" element={<Decisions />} />
           <Route path="strategy" element={<Strategy />} />
+          <Route path="modules" element={<Modules />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="meetings" element={<Meetings />} />
           <Route path="team" element={<Team />} />

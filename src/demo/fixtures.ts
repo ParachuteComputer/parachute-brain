@@ -683,6 +683,170 @@ export const STRATEGY: Note[] = [
   ),
 ];
 
+// --------------------------------------------------------------- Modules ----
+// The canonical module registry (Canon/Modules/*, tag:module). Mirrors the
+// seeded vault so the Modules view renders fully in demo mode.
+
+export const MODULES: Note[] = [
+  note(
+    "mod-vault",
+    "Canon/Modules/Vault",
+    ["module", "repo/parachute-vault"],
+    {
+      kind: "module",
+      role: "committed-core",
+      status: "live",
+      repo_slug: "parachute-vault",
+      npm: ["@openparachute/vault"],
+      port: "",
+      summary:
+        "The memory layer — a knowledge graph served over MCP and a plain HTTP REST API. The substrate every other module reads and writes.",
+    },
+    "# Vault\n\nThe memory layer — a knowledge graph of notes (markdown + metadata + typed graph links), exposed over both MCP and a plain HTTP REST API. The substrate every other module reads and writes.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-hub",
+    "Canon/Modules/Hub",
+    ["module", "repo/parachute-hub"],
+    {
+      kind: "module",
+      role: "committed-core",
+      status: "live",
+      repo_slug: "parachute-hub",
+      npm: ["@openparachute/hub"],
+      port: "1939",
+      summary:
+        "The portal on :1939 — OAuth issuer, service catalog, install/CLI surface, and (since 0.6.3) the process supervisor for all modules.",
+    },
+    "# Hub\n\nThe portal and front door on :1939. The project's auth root (OAuth issuer), the service catalog, the `parachute` CLI surface, and — since 0.6.3 — the process supervisor that runs every other module as a child.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-surface",
+    "Canon/Modules/Surface",
+    ["module", "repo/parachute-surface"],
+    {
+      kind: "module",
+      role: "committed-core",
+      status: "live",
+      repo_slug: "parachute-surface",
+      npm: [
+        "@openparachute/surface-client",
+        "@openparachute/surface-render",
+        "@openparachute/notes-ui",
+      ],
+      port: "",
+      summary:
+        "The UI host module + bundled reference surfaces (notes-ui) + the surface-builder SDK (surface-client / surface-render).",
+    },
+    "# Surface\n\nThe UI layer. A host module that serves bundled reference surfaces (Notes, future calendar/tasks), plus the surface-builder SDK — `surface-client` (auth + api) and `surface-render` (the renderer) — that makes a custom surface a thin import.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-scribe",
+    "Canon/Modules/Scribe",
+    ["module", "repo/parachute-scribe"],
+    {
+      kind: "module",
+      role: "committed-core",
+      status: "live",
+      repo_slug: "parachute-scribe",
+      npm: ["@openparachute/scribe"],
+      port: "",
+      summary:
+        "The transcription worker — turns audio/meetings into text that lands as vault captures.",
+    },
+    "# Scribe\n\nThe transcription worker — turns audio into text. The upstream of the meeting/capture pipeline: a recording becomes a vault capture.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-runner",
+    "Canon/Modules/Runner",
+    ["module", "repo/parachute-runner"],
+    {
+      kind: "module",
+      role: "shipped-not-promoted",
+      status: "live",
+      repo_slug: "parachute-runner",
+      npm: [],
+      port: "",
+      summary:
+        "Vault-as-job-substrate — spawns claude -p against tag:job notes. The lightweight automation primitive; the weave engine.",
+    },
+    "# Runner\n\nVault-as-job-substrate — a lightweight runner that spawns `claude -p` against `tag:job` notes. The owner-operated automation primitive and the engine behind the Weave. Shipped (Phase 1, 2026-05-21); not yet promoted to committed-core.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-channel",
+    "Canon/Modules/Channel",
+    ["module", "repo/parachute-channel"],
+    {
+      kind: "module",
+      role: "exploration",
+      status: "wip",
+      repo_slug: "parachute-channel",
+      npm: [],
+      port: "",
+      summary:
+        "Being redefined from a webhook fan-out into the agent-session gateway — named channels routing to resident Claude Code sessions.",
+    },
+    "# Channel\n\nFormerly a webhook fan-out marked \"may retire\"; being redefined into the agent-session gateway — named channels routing to resident Claude Code sessions.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-brain",
+    "Canon/Modules/Brain",
+    ["module", "repo/parachute-brain"],
+    {
+      kind: "app",
+      role: "internal-tooling",
+      status: "live",
+      repo_slug: "parachute-brain",
+      npm: [],
+      port: "",
+      summary:
+        "The team's internal surface over THIS vault (this app) — Work/Decisions/Feedback/Meetings/Strategy/Weave/Now views.",
+    },
+    "# Brain\n\nThe team's internal surface over this vault — the app you're reading the vault through. Work / Decisions / Feedback / Meetings / Strategy / Weave / Now. Built on the surface SDK; live on GitHub Pages; self-merge delegated.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-patterns",
+    "Canon/Modules/Patterns",
+    ["module", "repo/parachute-patterns"],
+    {
+      kind: "docs",
+      role: "core-support",
+      status: "live",
+      repo_slug: "parachute-patterns",
+      npm: [],
+      port: "",
+      summary:
+        "Cross-cutting conventions (docs-only): naming, brand, governance, ports, module protocol, schemas, migration checklists.",
+    },
+    "# Patterns\n\nThe cross-cutting conventions repo (docs-only, no code). Naming, brand, governance, ports, module protocol, OAuth scopes, schemas, migration checklists, and the canonical-refs audit script.",
+    "2026-06-08T14:30:00Z",
+  ),
+  note(
+    "mod-site",
+    "Canon/Modules/Site",
+    ["module", "repo/parachute.computer"],
+    {
+      kind: "site",
+      role: "core-support",
+      status: "live",
+      repo_slug: "parachute.computer",
+      npm: [],
+      port: "",
+      summary:
+        "The public site + blog (parachute.computer), built with Eleventy. Candidate to become generated from this vault.",
+    },
+    "# Site (parachute.computer)\n\nThe public marketing site + blog, built with Eleventy on GitHub Pages. A candidate to become generated from this vault via a publish tag.",
+    "2026-06-08T14:30:00Z",
+  ),
+];
+
 // ----------------------------------------------------------------- index ----
 
 export const ALL_NOTES: Note[] = [
@@ -696,4 +860,5 @@ export const ALL_NOTES: Note[] = [
   ...FEEDBACK_CAPTURES,
   ...PROPOSALS,
   ...DAILY,
+  ...MODULES,
 ];

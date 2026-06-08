@@ -13,6 +13,7 @@ const NAV = [
   { to: "/work", label: "Work" },
   { to: "/decisions", label: "Decisions" },
   { to: "/strategy", label: "Strategy" },
+  { to: "/modules", label: "Modules" },
   { to: "/feedback", label: "Feedback" },
   { to: "/meetings", label: "Meetings" },
   { to: "/team", label: "Team" },
