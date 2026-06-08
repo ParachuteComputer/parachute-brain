@@ -698,7 +698,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute-vault",
       npm: ["@openparachute/vault"],
-      port: "",
       summary:
         "The memory layer — a knowledge graph served over MCP and a plain HTTP REST API. The substrate every other module reads and writes.",
     },
@@ -736,7 +735,6 @@ export const MODULES: Note[] = [
         "@openparachute/surface-render",
         "@openparachute/notes-ui",
       ],
-      port: "",
       summary:
         "The UI host module + bundled reference surfaces (notes-ui) + the surface-builder SDK (surface-client / surface-render).",
     },
@@ -753,7 +751,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute-scribe",
       npm: ["@openparachute/scribe"],
-      port: "",
       summary:
         "The transcription worker — turns audio/meetings into text that lands as vault captures.",
     },
@@ -770,7 +767,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute-runner",
       npm: [],
-      port: "",
       summary:
         "Vault-as-job-substrate — spawns claude -p against tag:job notes. The lightweight automation primitive; the weave engine.",
     },
@@ -787,7 +783,6 @@ export const MODULES: Note[] = [
       status: "wip",
       repo_slug: "parachute-channel",
       npm: [],
-      port: "",
       summary:
         "Being redefined from a webhook fan-out into the agent-session gateway — named channels routing to resident Claude Code sessions.",
     },
@@ -804,7 +799,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute-brain",
       npm: [],
-      port: "",
       summary:
         "The team's internal surface over THIS vault (this app) — Work/Decisions/Feedback/Meetings/Strategy/Weave/Now views.",
     },
@@ -821,7 +815,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute-patterns",
       npm: [],
-      port: "",
       summary:
         "Cross-cutting conventions (docs-only): naming, brand, governance, ports, module protocol, schemas, migration checklists.",
     },
@@ -838,7 +831,6 @@ export const MODULES: Note[] = [
       status: "live",
       repo_slug: "parachute.computer",
       npm: [],
-      port: "",
       summary:
         "The public site + blog (parachute.computer), built with Eleventy. Candidate to become generated from this vault.",
     },

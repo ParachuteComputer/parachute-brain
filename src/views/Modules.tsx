@@ -74,13 +74,12 @@ function GitHubMark() {
   );
 }
 
+// The card root is a plain <div>, NOT a Link — so the GitHub repo link and
+// npm chips below can be real, keyboard-accessible <a> siblings without ever
+// nesting an anchor inside an anchor (invalid HTML). Only the title is a Link.
 function ModuleCard({ m, i }: { m: Module; i: number }) {
   return (
-    <Link
-      to={noteHref(m.path)}
-      className="card card-hover module-card fade-up"
-      style={staggerStyle(i)}
-    >
+    <div className="card module-card fade-up" style={staggerStyle(i)}>
       <div className="module-card-head">
         {m.repoSlug && (
           <span
@@ -89,7 +88,9 @@ function ModuleCard({ m, i }: { m: Module; i: number }) {
             aria-hidden="true"
           />
         )}
-        <span className="module-name">{m.title}</span>
+        <Link to={noteHref(m.path)} className="module-name">
+          {m.title}
+        </Link>
       </div>
 
       <div className="module-pills">
@@ -113,7 +114,6 @@ function ModuleCard({ m, i }: { m: Module; i: number }) {
             target="_blank"
             rel="noreferrer"
             className="module-repo-link"
-            onClick={(e) => e.stopPropagation()}
             title={`ParachuteComputer/${m.repoSlug}`}
           >
             <GitHubMark />
@@ -127,7 +127,6 @@ function ModuleCard({ m, i }: { m: Module; i: number }) {
             target="_blank"
             rel="noreferrer"
             className="module-npm-chip"
-            onClick={(e) => e.stopPropagation()}
             title={pkg}
           >
             <span className="module-npm-mark">npm</span>
@@ -140,7 +139,7 @@ function ModuleCard({ m, i }: { m: Module; i: number }) {
           </span>
         )}
       </div>
-    </Link>
+    </div>
   );
 }
 
@@ -151,6 +150,8 @@ export function Modules() {
     limit: "100",
   });
 
+  // Bucket by kind only — the authoritative sort happens at render time over
+  // each section's merged array (Support folds docs + site together).
   const byKind = useMemo(() => {
     const mods = (data ?? []).map(toModule);
     const map = new Map<ModuleKind, Module[]>();
@@ -158,19 +159,14 @@ export function Modules() {
     for (const m of mods) {
       if (m.kind && map.has(m.kind)) map.get(m.kind)!.push(m);
     }
-    for (const arr of map.values()) {
-      arr.sort((a, b) => {
-        const r = roleRank(a.role) - roleRank(b.role);
-        if (r !== 0) return r;
-        return a.title.localeCompare(b.title);
-      });
-    }
     return map;
   }, [data]);
 
   if (loading) return <Loader />;
   if (error) return <ErrorBox message={error} />;
 
+  // Count of projected modules (notes with a recognized kind), not raw notes —
+  // a tag:module note with an unknown kind falls into no bucket and isn't shown.
   const total = [...byKind.values()].reduce((n, arr) => n + arr.length, 0);
 
   return (

@@ -33,6 +33,9 @@
   --tint-lavender: rgba(124, 113, 158, 0.14);
   --tint-lavender-fg: #5d527e;
 
+  /* Brand-fixed accents (same across themes) */
+  --npm-red: #cb3837;
+
   /* Type */
   --font-display: "Instrument Serif", Georgia, "Times New Roman", serif;
   --font-body: "DM Sans", system-ui, -apple-system, sans-serif;
@@ -840,7 +843,7 @@ button.row {
 }
 .module-npm-mark {
   font-weight: 600;
-  color: #cb3837;
+  color: var(--npm-red);
 }
 .module-port {
   font-family: var(--font-mono);
