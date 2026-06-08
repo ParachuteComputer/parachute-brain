@@ -24,8 +24,16 @@ export type WorkStatus = (typeof WORK_STATUSES)[number];
 export const WORK_KINDS = ["brainstorm", "plan", "task", "bug", "chore"] as const;
 export type WorkKind = (typeof WORK_KINDS)[number];
 
-export const PRIORITIES = ["p0", "p1", "p2"] as const;
-export type Priority = (typeof PRIORITIES)[number];
+// Work priority — the focus horizon. now = current focus, next = queued,
+// later = backlog. (Migrated from p0/p1/p2 on 2026-06-08; live data may still
+// carry legacy values, so projectors + tints must tolerate the unknown.)
+export const WORK_PRIORITIES = ["now", "next", "later"] as const;
+export type WorkPriority = (typeof WORK_PRIORITIES)[number];
+
+// feedback-theme `severity` is a SEPARATE field and KEEPS p0/p1/p2. Don't
+// conflate it with work priority — see severityTint usage in Feedback / Today.
+export const SEVERITIES = ["p0", "p1", "p2"] as const;
+export type Severity = (typeof SEVERITIES)[number];
 
 export const DECISION_STATUSES = [
   "proposed",
@@ -184,11 +192,16 @@ export interface Org extends BaseEntity {
 export interface Work extends BaseEntity {
   kind?: WorkKind;
   status?: WorkStatus;
-  priority?: Priority;
+  /** Raw priority string from the vault — may be a legacy value mid-migration. */
+  priority?: string;
   assignee?: string;
   target?: string;
   ghLinks?: string[];
   repos: Repo[];
+  /** metadata.needs_decision — this arc is waiting on a human call. */
+  needsDecision: boolean;
+  /** metadata.the_call — the one-liner stating the actual decision to make. */
+  theCall?: string;
 }
 
 export interface Decision extends BaseEntity {
@@ -214,7 +227,8 @@ export interface Strategy extends BaseEntity {
 export interface FeedbackTheme extends BaseEntity {
   status?: FeedbackStatus;
   category?: FeedbackCategory;
-  severity?: Priority;
+  /** Severity stays p0/p1/p2 — a different axis from work priority. */
+  severity?: Severity;
   captureCount?: number;
 }
 
@@ -275,8 +289,36 @@ export function workStatusTint(s?: WorkStatus): Tint {
   }
 }
 
-export function priorityTint(p?: Priority): Tint {
+/**
+ * Work priority tint — gentle by design. now reads warm (terracotta), next
+ * sky, later stone. Any legacy / unknown / empty value falls through to a
+ * neutral stone pill (and sorts last; see priorityRank). Never throws.
+ */
+export function priorityTint(p?: string): Tint {
   switch (p) {
+    case "now":
+      return "terracotta";
+    case "next":
+      return "sky";
+    case "later":
+      return "stone";
+    default:
+      return "stone";
+  }
+}
+
+// Focus-horizon order: now → next → later, with anything unrecognized last.
+const PRIORITY_RANK: Record<string, number> = { now: 0, next: 1, later: 2 };
+export function priorityRank(p?: string): number {
+  return p && p in PRIORITY_RANK ? PRIORITY_RANK[p]! : 99;
+}
+
+/**
+ * Feedback-theme severity tint — DISTINCT from work priority. Stays p0/p1/p2;
+ * p0 reads most urgent (terracotta), p1 amber, p2 stone.
+ */
+export function severityTint(s?: Severity): Tint {
+  switch (s) {
     case "p0":
       return "terracotta";
     case "p1":

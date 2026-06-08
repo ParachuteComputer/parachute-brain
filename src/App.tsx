@@ -20,6 +20,7 @@ import { Feedback } from "./views/Feedback";
 import { Meetings } from "./views/Meetings";
 import { Team } from "./views/Team";
 import { Weave } from "./views/Weave";
+import { Library } from "./views/Library";
 import { Detail } from "./views/Detail";
 
 export function App() {
@@ -34,13 +35,15 @@ export function App() {
         <Route element={<Shell />}>
           <Route index element={<Today />} />
           <Route path="work" element={<Work />} />
+          <Route path="weave" element={<Weave />} />
+          <Route path="library" element={<Library />} />
+          {/* Off the top nav (reached via Library), but routes stay live. */}
           <Route path="decisions" element={<Decisions />} />
           <Route path="strategy" element={<Strategy />} />
           <Route path="modules" element={<Modules />} />
           <Route path="feedback" element={<Feedback />} />
           <Route path="meetings" element={<Meetings />} />
           <Route path="team" element={<Team />} />
-          <Route path="weave" element={<Weave />} />
           <Route path="n/*" element={<Detail />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>

@@ -215,7 +215,7 @@ export const WORK: Note[] = [
     {
       kind: "chore",
       status: "in-progress",
-      priority: "p2",
+      priority: "now",
       assignee: "lucian",
       summary:
         "Rename parachute-app → parachute-surface across the workspace: CLAUDE.md, package metadata, design-doc slugs, cross-repo references.",
@@ -225,13 +225,32 @@ export const WORK: Note[] = [
     "# parachute-app → parachute-surface rename\n\nConsolidating the host-module naming. The repo became `parachute-surface` on 2026-05-27; this chore chases the references that point at the old slug.\n\nDone:\n- workspace `CLAUDE.md`\n- design-doc slug typo fix\n\nRemaining:\n- a few stale pattern-doc references caught by the canonical-refs audit.",
   ),
   note(
+    "w-stable-promotion",
+    "Work/stable-latest-promotion",
+    ["work", "repo/parachute-hub", "repo/parachute-vault"],
+    {
+      kind: "plan",
+      status: "in-review",
+      priority: "now",
+      assignee: "aaron",
+      needs_decision: true,
+      the_call:
+        "Promote hub 0.6.5 / vault 0.5.3 to @latest, or keep validating?",
+      summary:
+        "Both boxes have run the rc chain clean for a week. The only thing left is dropping the -rc suffix and publishing @latest — Aaron's ship call.",
+      gh_links: ["parachute-hub#570", "parachute-vault#438"],
+      target: "2026-06-04",
+    },
+    "# Promote to stable @latest\n\nThe rc chain (hub 0.6.5-rc.N + vault 0.5.3-rc.N) has run clean on both boxes for a week. The remaining work is purely a release gate:\n\n- Drop the `-rc` suffix, ship the same `0.X.Y` stable.\n- `npm publish --tag latest` (CI on `v*` tag push).\n- GH release carries the legacy-recovery snippet.\n\n**The call is Aaron's:** ship now, or keep validating another cycle?",
+  ),
+  note(
     "w-auth-arc",
     "Work/auth-unification-arc",
     ["work", "repo/parachute-vault", "repo/parachute-hub"],
     {
       kind: "plan",
       status: "shipped",
-      priority: "p1",
+      priority: "later",
       assignee: "lucian",
       summary:
         "Retire pvt_* tokens via capability attenuation; self-heal origin-pinned credentials on expose. The class behind the recurring \"not signed in to the hub\".",
@@ -258,8 +277,11 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "exploring",
-      priority: "p1",
+      priority: "next",
       assignee: "aaron",
+      needs_decision: true,
+      the_call:
+        "Ship the hub-as-supervisor design doc as-is, or split the reboot-survival piece into its own phase first?",
       summary:
         "Unify ALL deploys on `parachute serve` (hub-as-supervisor, modules = children) under a per-platform process manager. Retire the manager-less detached-daemon model.",
       gh_links: ["parachute-hub#260"],
@@ -274,7 +296,7 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "shipped",
-      priority: "p2",
+      priority: "later",
       assignee: "benjamin",
       summary:
         "Two drifted Obsidian parsers (CLI-core vs Notes-UI browser); hub admin had none. Aligned in-place against a shared behavior contract + fixtures.",
@@ -289,7 +311,7 @@ export const WORK: Note[] = [
     {
       kind: "bug",
       status: "in-review",
-      priority: "p1",
+      priority: "now",
       assignee: "lucian",
       summary:
         "RFC 8707 resource indicator / audience handling on token exchange. NOT the Claude connector blocker — Claude accepts aud=vault.default — but worth getting right.",
@@ -304,7 +326,7 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "shipped",
-      priority: "p1",
+      priority: "next",
       assignee: "lucian",
       summary:
         "Per-host Cloudflare tunnel — old shared name load-balanced connectors across machines → cross-host 404s. Plus reboot-persistent connector via launchd/systemd.",
@@ -319,7 +341,7 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "planned",
-      priority: "p1",
+      priority: "now",
       assignee: "aaron",
       summary:
         "Build Parachute Brain — the team's internal web surface over the project vault. Calm, on-brand, the at-a-glance team-sync home.",
@@ -334,7 +356,7 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "planned",
-      priority: "p2",
+      priority: "next",
       assignee: "benjamin",
       summary:
         "A runner job that digests overnight captures into proposals for the Weave queue — entity + link suggestions for the team to approve each morning.",
@@ -349,7 +371,7 @@ export const WORK: Note[] = [
     {
       kind: "task",
       status: "inbox",
-      priority: "p2",
+      priority: "later",
       summary: "Auto-detect source language before transcription.",
     },
     "# Scribe language autodetect\n\nIdea from a beta user — detect language so they don't have to set it per upload.",
@@ -361,7 +383,7 @@ export const WORK: Note[] = [
     {
       kind: "brainstorm",
       status: "exploring",
-      priority: "p2",
+      priority: "later",
       assignee: "benjamin",
       summary: "Per-job spend ceilings so a runaway job can't burn the budget.",
     },

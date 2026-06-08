@@ -1063,6 +1063,151 @@ button.row {
   color: var(--fg-dim);
 }
 
+/* --- Home: the morning brief ---------------------------------------------- */
+
+/* A calm, low-key empty line — used for "Nothing needs your call right now."
+   and the Focus runway. Quiet on purpose: an absence shouldn't shout. */
+.calm-empty {
+  padding: 22px 24px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius-card);
+  color: var(--fg-muted);
+  font-size: 1.02rem;
+  background: color-mix(in srgb, var(--bg-soft) 60%, transparent);
+}
+
+/* "Waiting on you" — the decision cards. Largest visual weight on the page:
+   a generous two-up grid, each card carrying the actual call. */
+.waiting-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 16px;
+}
+.decide-card {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  /* A soft warm wash so the decisions read as the live, warm part of the page. */
+  background: linear-gradient(
+    180deg,
+    var(--tint-terracotta) 0%,
+    transparent 70%
+  );
+  border-color: var(--border);
+}
+.decide-card-proposal {
+  /* Proposals are lower-temperature than a direct call — sky, not terracotta. */
+  background: linear-gradient(180deg, var(--tint-sky) 0%, transparent 70%);
+}
+.decide-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.decide-arc {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.decide-call {
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--fg);
+  margin: 0;
+}
+.decide-call-muted {
+  color: var(--fg-muted);
+  font-size: 0.94rem;
+}
+.decide-link {
+  font-size: 0.86rem;
+  color: var(--accent);
+  font-weight: 500;
+  margin-top: 2px;
+}
+
+/* Focus rows reuse .row but lead with the title (no date gutter). Blocked
+   items stay visible but recede. */
+.focus-row .row-meta {
+  margin-bottom: 0;
+}
+.focus-row .work-card-repos {
+  margin-top: 10px;
+}
+.focus-row-dim {
+  opacity: 0.6;
+}
+.focus-row-dim:hover {
+  opacity: 0.85;
+}
+
+/* "the_call" callout on a work detail page — the decision, stated plainly. */
+.call-callout {
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--tint-terracotta-fg);
+  border-radius: var(--radius-card);
+  background: linear-gradient(
+    180deg,
+    var(--tint-terracotta) 0%,
+    transparent 80%
+  );
+  padding: 18px 22px;
+  margin-bottom: 28px;
+}
+.call-callout-text {
+  font-family: var(--font-display);
+  font-size: 1.35rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+  margin: 6px 0 0;
+}
+
+/* --- Library — the index of the supporting type-views --------------------- */
+.library-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+.library-card {
+  padding: 22px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.library-card-head {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+.library-card-title {
+  font-family: var(--font-display);
+  font-size: 1.4rem;
+  line-height: 1.15;
+  letter-spacing: -0.01em;
+  color: var(--fg);
+}
+.library-card-desc {
+  font-size: 0.92rem;
+  color: var(--fg-muted);
+  line-height: 1.55;
+  margin: 0;
+}
+.library-icon {
+  width: 22px;
+  height: 22px;
+  color: var(--fg-dim);
+  flex-shrink: 0;
+}
+.library-icon svg {
+  width: 100%;
+  height: 100%;
+}
+
 /* --- Daily summary banner --- */
 .daily-banner {
   background: linear-gradient(

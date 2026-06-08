@@ -7,16 +7,13 @@ import { ParachuteLogo } from "./ParachuteLogo";
 import { useTheme } from "./ThemeContext";
 import { useSession } from "../data/SessionContext";
 
+// Four job-shaped tabs. The type-views (Decisions / Meetings / Team / Strategy
+// / Modules / Feedback) moved off the top nav and are reached via Library.
 const NAV = [
-  { to: "/", label: "Today", end: true },
+  { to: "/", label: "Home", end: true },
   { to: "/work", label: "Work" },
-  { to: "/decisions", label: "Decisions" },
-  { to: "/strategy", label: "Strategy" },
-  { to: "/modules", label: "Modules" },
-  { to: "/feedback", label: "Feedback" },
-  { to: "/meetings", label: "Meetings" },
-  { to: "/team", label: "Team" },
   { to: "/weave", label: "Weave" },
+  { to: "/library", label: "Library" },
 ];
 
 function SunIcon() {

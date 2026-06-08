@@ -9,7 +9,12 @@ import { toWork } from "../data/model";
 import { Loader, Empty, ErrorBox, RepoChip } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import { WorkCard } from "../components/WorkCard";
-import { REPOS, WORK_STATUSES, type Work as WorkT } from "../data/schema";
+import {
+  REPOS,
+  WORK_STATUSES,
+  priorityRank,
+  type Work as WorkT,
+} from "../data/schema";
 import { staggerStyle } from "../lib/format";
 
 // Columns shown on the board (shipped/dropped folded to the right / hidden).
@@ -23,8 +28,6 @@ const COLUMN_LABEL: Record<string, string> = {
   "in-review": "In review",
   shipped: "Shipped",
 };
-
-const PRIORITY_RANK: Record<string, number> = { p0: 0, p1: 1, p2: 2 };
 
 export function Work() {
   const { data, loading, error } = useNotes({
@@ -60,12 +63,9 @@ export function Work() {
       map.get(col)!.push(w);
     }
     if (prioritySort) {
+      // now → next → later, with legacy / unknown priorities sorted last.
       for (const arr of map.values())
-        arr.sort(
-          (a, b) =>
-            (PRIORITY_RANK[a.priority ?? "p2"] ?? 2) -
-            (PRIORITY_RANK[b.priority ?? "p2"] ?? 2),
-        );
+        arr.sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
     }
     return map;
   }, [filtered, prioritySort]);

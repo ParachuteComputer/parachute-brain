@@ -1,276 +1,274 @@
 /**
- * Today — the team-sync home. Daily summary at top (if present), a
- * "where things stand" header with counts, then active work, recent
- * decisions, needs-review, open feedback, and meetings.
+ * Home — the morning brief. An ACTIVE read, top to bottom:
+ *
+ *   1. Waiting on you   — the decisions waiting on a human call (needs_decision
+ *                         work + pending Weave proposals). The point of the page.
+ *   2. Focus            — what to actually do next, computed client-side from the
+ *                         board (in-progress → now → next; blocked de-emphasized).
+ *   3. What moved        — the latest daily summary, demoted to the narrative "why".
+ *
+ * The founder opens this every morning; it answers "what needs me, and what's
+ * next" before anything else.
  */
 import { Link } from "react-router-dom";
 import { useNotes } from "../data/useNotes";
-import {
-  toDecision,
-  toFeedbackTheme,
-  toMeeting,
-  toProposal,
-  toWork,
-} from "../data/model";
-import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
+import { toProposal, toWork } from "../data/model";
+import { Loader, ErrorBox, Pill, RepoChip } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
-import { WorkCard } from "../components/WorkCard";
 import { NoteBody } from "../components/NoteBody";
 import {
-  decisionTint,
-  feedbackStatusTint,
-  meetingStatusTint,
+  priorityRank,
+  priorityTint,
+  workStatusTint,
+  type Work,
 } from "../data/schema";
 import {
   label,
   fmtDate,
-  fmtDateShort,
   noteHref,
   staggerStyle,
   todayISO,
 } from "../lib/format";
 
+// Work that's genuinely "in flight or queued" — the Focus pool.
+const FOCUS_EXCLUDE = new Set(["shipped", "dropped"]);
+
+/**
+ * Days until / since an ISO target date (UTC-midnight anchored). Returns null
+ * for anything that doesn't parse — many `target`s are free text ("when Aaron
+ * says"), and those simply get no due-chip rather than a wrong one.
+ */
+function daysFromToday(target?: string): number | null {
+  if (!target) return null;
+  const iso = target.trim();
+  // Only treat strict YYYY-MM-DD (optionally with a time) as a real date.
+  if (!/^\d{4}-\d{2}-\d{2}/.test(iso)) return null;
+  const t = new Date(iso.length === 10 ? iso + "T00:00:00Z" : iso).getTime();
+  if (Number.isNaN(t)) return null;
+  const ref = todayISO();
+  const now = new Date(ref + "T00:00:00Z").getTime();
+  return Math.round((t - now) / 86_400_000);
+}
+
+function DueChip({ target }: { target?: string }) {
+  const d = daysFromToday(target);
+  if (d === null) return null;
+  if (d === 0) return <Pill tint="amber">due today</Pill>;
+  if (d > 0)
+    return (
+      <Pill tint={d <= 3 ? "amber" : "stone"}>
+        due in {d} {d === 1 ? "day" : "days"}
+      </Pill>
+    );
+  const ago = -d;
+  return (
+    <Pill tint="terracotta">
+      {ago} {ago === 1 ? "day" : "days"} ago
+    </Pill>
+  );
+}
+
 export function Today() {
-  const work = useNotes({ tag: "work", include_metadata: "true", limit: "200" });
-  const decisions = useNotes({
-    tag: "decision",
-    include_metadata: "true",
-    sort: "-decided_on",
-    limit: "200",
-  });
-  const themes = useNotes({
-    tag: "feedback-theme",
-    include_metadata: "true",
-    limit: "200",
-  });
+  const work = useNotes({ tag: "work", include_metadata: "true", limit: "500" });
   const proposals = useNotes({
     tag: "proposal",
     include_metadata: "true",
     limit: "200",
   });
-  const meetings = useNotes({
-    tag: "meeting",
-    include_metadata: "true",
-    sort: "-held_on",
-    limit: "200",
-  });
   const daily = useNotes({ path_prefix: `summaries/daily/${todayISO()}` });
 
-  if (
-    work.loading ||
-    decisions.loading ||
-    themes.loading ||
-    proposals.loading ||
-    meetings.loading
-  )
-    return <Loader />;
+  if (work.loading || proposals.loading) return <Loader />;
 
-  const err =
-    work.error || decisions.error || themes.error || proposals.error;
+  const err = work.error || proposals.error;
   if (err) return <ErrorBox message={err} />;
 
   const works = (work.data ?? []).map(toWork);
-  const inProgress = works.filter((w) => w.status === "in-progress");
-  const blocked = works.filter((w) => w.status === "blocked");
-  const active = [...inProgress, ...blocked];
 
-  const decs = (decisions.data ?? []).map(toDecision);
-  const recentAccepted = decs
-    .filter((d) => d.status === "accepted")
-    .slice(0, 3);
-
-  const allThemes = (themes.data ?? []).map(toFeedbackTheme);
-  const openFeedback = allThemes.filter(
-    (t) =>
-      (t.severity === "p0" || t.severity === "p1") &&
-      t.status !== "resolved" &&
-      t.status !== "wontfix",
-  );
-
-  const pending = (proposals.data ?? [])
+  // 1 — Waiting on you ------------------------------------------------------
+  const needsDecision = works.filter((w) => w.needsDecision);
+  const pendingProposals = (proposals.data ?? [])
     .map(toProposal)
     .filter((p) => p.status === "pending");
+  const waitingCount = needsDecision.length + pendingProposals.length;
 
-  const meets = (meetings.data ?? []).map(toMeeting).slice(0, 4);
+  // 2 — Focus (what's next), computed client-side from the board -----------
+  // in-progress first, then by priority (now → next → later), blocked sinks but
+  // stays visible (greyed). shipped/dropped are out entirely.
+  const focusPool = works.filter(
+    (w) => !FOCUS_EXCLUDE.has(w.status ?? "") && !w.needsDecision,
+  );
+  const focus = [...focusPool]
+    .sort((a, b) => focusScore(a) - focusScore(b))
+    .slice(0, 6);
+
   const dailyNote = daily.data?.[0];
 
   return (
     <div className="page-enter">
-      {dailyNote && (
-        <div className="daily-banner fade-up">
-          <p className="eyebrow">Daily sync · {fmtDate(todayISO())}</p>
-          <NoteBody note={dailyNote} />
-        </div>
-      )}
-
       <PageHeader
-        eyebrow="The view from up here"
-        title="Where things stand"
-        lead="A calm read on the work in flight, the calls we've made, and what's waiting on the team."
-      >
-        <div className="stat-row">
-          <Stat n={inProgress.length} cls="accent" label="in progress" />
-          <Stat n={blocked.length} cls="warn" label="blocked" />
-          <Stat n={pending.length} cls="" label="pending proposals" />
-          <Stat
-            n={openFeedback.length}
-            cls="alert"
-            label="open p0 / p1 feedback"
-          />
-        </div>
-      </PageHeader>
+        eyebrow={`Morning brief · ${fmtDate(todayISO())}`}
+        title="Good morning"
+        lead="What needs your call, what's next, and what moved overnight — top to bottom."
+      />
 
+      {/* 1 — Waiting on you ------------------------------------------------ */}
       <section className="section">
         <div className="section-head">
-          <h2 className="section-title">Active work</h2>
-          <Link to="/work" className="section-link">
-            All work →
-          </Link>
+          <h2 className="section-title">Waiting on you</h2>
+          {waitingCount > 0 && (
+            <span className="muted" style={{ fontSize: "0.85rem" }}>
+              {waitingCount} {waitingCount === 1 ? "call" : "calls"}
+            </span>
+          )}
         </div>
-        {active.length === 0 ? (
-          <Empty title="Nothing in flight" text="No in-progress or blocked work right now." />
+
+        {waitingCount === 0 ? (
+          <div className="calm-empty fade-up">
+            Nothing needs your call right now.
+          </div>
         ) : (
-          <div className="grid grid-auto">
-            {active.map((w, i) => (
-              <div key={w.id} className="fade-up" style={staggerStyle(i)}>
-                <WorkCard work={w} showStatus />
-              </div>
+          <div className="waiting-list">
+            {needsDecision.map((w, i) => (
+              <DecisionCard key={w.id} work={w} i={i} />
+            ))}
+            {pendingProposals.map((p, i) => (
+              <Link
+                key={p.id}
+                to="/weave"
+                className="card card-hover decide-card decide-card-proposal fade-up"
+                style={staggerStyle(needsDecision.length + i)}
+              >
+                <div className="decide-head">
+                  <Pill tint="sky" dot>
+                    Proposal
+                  </Pill>
+                  <span className="decide-arc">{p.entityName ?? p.title}</span>
+                </div>
+                {p.evidence && <p className="decide-call">{p.evidence}</p>}
+                <span className="decide-link">Review in Weave →</span>
+              </Link>
             ))}
           </div>
         )}
       </section>
 
-      <div className="grid grid-2" style={{ alignItems: "start" }}>
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">Recent decisions</h2>
-            <Link to="/decisions" className="section-link">
-              All →
-            </Link>
-          </div>
-          <div className="row-list">
-            {recentAccepted.map((d, i) => (
-              <Link
-                key={d.id}
-                to={noteHref(d.path)}
-                className="card card-hover row fade-up"
-                style={staggerStyle(i)}
-              >
-                <span className="row-date">{fmtDate(d.decidedOn)}</span>
-                <span className="row-body">
-                  <span className="row-title">{d.title}</span>
-                  <span className="row-meta">
-                    <Pill tint={decisionTint(d.status)} dot>
-                      {label(d.status)}
-                    </Pill>
-                    {d.scope && <Pill tint="lavender">{label(d.scope)}</Pill>}
-                  </span>
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
-
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">Needs review</h2>
-            <Link to="/weave" className="section-link">
-              Open Weave →
-            </Link>
-          </div>
-          <Link to="/weave" className="card card-hover card-pad fade-up">
-            <div className="stat-num accent" style={{ fontSize: "3rem" }}>
-              {pending.length}
-            </div>
-            <p className="muted" style={{ margin: "4px 0 0" }}>
-              {pending.length === 1 ? "proposal" : "proposals"} waiting in the
-              Weave queue — entities and links the team can approve or set
-              aside.
-            </p>
+      {/* 2 — Focus -------------------------------------------------------- */}
+      <section className="section">
+        <div className="section-head">
+          <h2 className="section-title">Focus — what's next</h2>
+          <Link to="/work" className="section-link">
+            All work →
           </Link>
-        </section>
-      </div>
+        </div>
 
-      <div className="grid grid-2" style={{ alignItems: "start" }}>
-        <section className="section">
-          <div className="section-head">
-            <h2 className="section-title">Open feedback</h2>
-            <Link to="/feedback" className="section-link">
-              All themes →
-            </Link>
+        {focus.length === 0 ? (
+          <div className="calm-empty fade-up">
+            Nothing queued. A clear runway.
           </div>
-          {openFeedback.length === 0 ? (
-            <Empty title="Inbox calm" text="No open p0 / p1 themes." />
-          ) : (
-            <div className="row-list">
-              {openFeedback.map((t, i) => (
+        ) : (
+          <div className="row-list">
+            {focus.map((w, i) => {
+              const dim = w.status === "blocked";
+              return (
                 <Link
-                  key={t.id}
-                  to={noteHref(t.path)}
-                  className="card card-hover row fade-up"
+                  key={w.id}
+                  to={noteHref(w.path)}
+                  className={`card card-hover row focus-row fade-up${
+                    dim ? " focus-row-dim" : ""
+                  }`}
                   style={staggerStyle(i)}
                 >
                   <span className="row-body">
-                    <span className="row-title">{t.title}</span>
+                    <span className="row-title">{w.title}</span>
                     <span className="row-meta">
-                      {t.severity && (
-                        <Pill tint={t.severity === "p0" ? "terracotta" : "amber"}>
-                          {t.severity.toUpperCase()}
+                      {w.status && (
+                        <Pill tint={workStatusTint(w.status)}>
+                          {label(w.status)}
                         </Pill>
                       )}
-                      <Pill tint={feedbackStatusTint(t.status)} dot>
-                        {label(t.status)}
-                      </Pill>
+                      {w.priority && (
+                        <Pill tint={priorityTint(w.priority)}>
+                          {label(w.priority)}
+                        </Pill>
+                      )}
+                      <DueChip target={w.target} />
                     </span>
-                    {t.summary && (
-                      <span className="row-summary">{t.summary}</span>
+                    {w.repos.length > 0 && (
+                      <span className="work-card-repos">
+                        {w.repos.map((r) => (
+                          <RepoChip key={r} repo={r} />
+                        ))}
+                      </span>
                     )}
                   </span>
                 </Link>
-              ))}
-            </div>
-          )}
-        </section>
+              );
+            })}
+          </div>
+        )}
+      </section>
 
+      {/* 3 — What moved --------------------------------------------------- */}
+      {dailyNote && (
         <section className="section">
           <div className="section-head">
-            <h2 className="section-title">Meetings</h2>
-            <Link to="/meetings" className="section-link">
-              Timeline →
-            </Link>
+            <h2 className="section-title">What moved</h2>
           </div>
-          <div className="row-list">
-            {meets.map((m, i) => (
-              <Link
-                key={m.id}
-                to={noteHref(m.path)}
-                className="card card-hover row fade-up"
-                style={staggerStyle(i)}
-              >
-                <span className="row-date">{fmtDateShort(m.heldOn)}</span>
-                <span className="row-body">
-                  <span className="row-title">{m.title}</span>
-                  <span className="row-meta">
-                    <Pill tint={meetingStatusTint(m.status)} dot>
-                      {label(m.status)}
-                    </Pill>
-                    {m.series && <Pill tint="stone">{m.series}</Pill>}
-                  </span>
-                </span>
-              </Link>
-            ))}
+          <div className="daily-banner fade-up">
+            <NoteBody note={dailyNote} />
           </div>
         </section>
-      </div>
+      )}
     </div>
   );
 }
 
-function Stat({ n, cls, label }: { n: number; cls: string; label: string }) {
+/**
+ * Focus sort key (lower = higher up). in-progress / in-review share the top
+ * band; blocked sinks to the bottom but isn't dropped; everything else sits in
+ * between. Within a band, the now/next/later horizon refines the order.
+ */
+function focusScore(w: Work): number {
+  // status bucket — coarse band, then priority refines within it.
+  let band: number;
+  if (w.status === "in-progress" || w.status === "in-review") band = 0;
+  else if (w.status === "blocked") band = 3;
+  else band = 1;
+  return band * 10 + priorityRankClamped(w.priority);
+}
+
+// priorityRank returns 99 for unknowns; clamp so it doesn't dominate the band.
+function priorityRankClamped(p?: string): number {
+  const r = priorityRank(p);
+  return r > 3 ? 3 : r;
+}
+
+function DecisionCard({ work, i }: { work: Work; i: number }) {
   return (
-    <div className="stat">
-      <span className={`stat-num ${cls}`}>{n}</span>
-      <span className="stat-label">{label}</span>
-    </div>
+    <Link
+      to={noteHref(work.path)}
+      className="card card-hover decide-card fade-up"
+      style={staggerStyle(i)}
+    >
+      <div className="decide-head">
+        <Pill tint="terracotta" dot>
+          Decision
+        </Pill>
+        <span className="decide-arc">{work.title}</span>
+      </div>
+      {work.theCall ? (
+        <p className="decide-call">{work.theCall}</p>
+      ) : work.summary ? (
+        <p className="decide-call decide-call-muted">{work.summary}</p>
+      ) : null}
+      {work.repos.length > 0 && (
+        <div className="work-card-repos" style={{ marginTop: 4 }}>
+          {work.repos.map((r) => (
+            <RepoChip key={r} repo={r} />
+          ))}
+        </div>
+      )}
+      <span className="decide-link">Open the arc →</span>
+    </Link>
   );
 }

@@ -14,7 +14,7 @@ import {
   FEEDBACK_STATUSES,
   categoryTint,
   feedbackStatusTint,
-  priorityTint,
+  severityTint,
   type FeedbackStatus,
 } from "../data/schema";
 import { label, noteHref, staggerStyle } from "../lib/format";
@@ -120,7 +120,7 @@ export function Feedback() {
                   >
                     <div className="work-card-meta">
                       {t.severity && (
-                        <Pill tint={priorityTint(t.severity)}>
+                        <Pill tint={severityTint(t.severity)}>
                           {t.severity.toUpperCase()}
                         </Pill>
                       )}
