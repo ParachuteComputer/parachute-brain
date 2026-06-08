@@ -219,7 +219,7 @@ export const WORK: Note[] = [
       assignee: "lucian",
       summary:
         "Rename parachute-app → parachute-surface across the workspace: CLAUDE.md, package metadata, design-doc slugs, cross-repo references.",
-      gh_links: ["parachute-surface#1", "parachute-surface#2"],
+      gh_links: ["hub#480", "vault#412", "parachute-surface#1"],
       target: "2026-06-05",
     },
     "# parachute-app → parachute-surface rename\n\nConsolidating the host-module naming. The repo became `parachute-surface` on 2026-05-27; this chore chases the references that point at the old slug.\n\nDone:\n- workspace `CLAUDE.md`\n- design-doc slug typo fix\n\nRemaining:\n- a few stale pattern-doc references caught by the canonical-refs audit.",
@@ -800,9 +800,9 @@ export const MODULES: Note[] = [
       repo_slug: "parachute-brain",
       npm: [],
       summary:
-        "The team's internal surface over THIS vault (this app) — Work/Decisions/Feedback/Meetings/Strategy/Weave/Now views.",
+        "The team's internal surface over THIS vault (this app) — Work/Decisions/Feedback/Meetings/Strategy/Weave/Modules views.",
     },
-    "# Brain\n\nThe team's internal surface over this vault — the app you're reading the vault through. Work / Decisions / Feedback / Meetings / Strategy / Weave / Now. Built on the surface SDK; live on GitHub Pages; self-merge delegated.",
+    "# Brain\n\nThe team's internal surface over this vault — the app you're reading the vault through. Work / Decisions / Feedback / Meetings / Strategy / Weave / Modules. Built on the surface SDK; live on GitHub Pages; self-merge delegated.",
     "2026-06-08T14:30:00Z",
   ),
   note(

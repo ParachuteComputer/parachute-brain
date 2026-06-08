@@ -12,7 +12,6 @@ import { Shell } from "./components/Shell";
 import { Connect } from "./views/Connect";
 import { OAuthCallback } from "./views/OAuthCallback";
 import { Today } from "./views/Today";
-import { Now } from "./views/Now";
 import { Work } from "./views/Work";
 import { Decisions } from "./views/Decisions";
 import { Strategy } from "./views/Strategy";
@@ -34,7 +33,6 @@ export function App() {
       {signedIn ? (
         <Route element={<Shell />}>
           <Route index element={<Today />} />
-          <Route path="now" element={<Now />} />
           <Route path="work" element={<Work />} />
           <Route path="decisions" element={<Decisions />} />
           <Route path="strategy" element={<Strategy />} />

@@ -880,6 +880,14 @@ button.row {
   padding-left: 14px;
   border-left: 2px solid var(--border);
 }
+.weave-missing-summary {
+  font-size: 0.82rem;
+  color: var(--tint-terracotta-fg);
+  background: var(--tint-terracotta);
+  border-radius: var(--radius-card);
+  padding: 8px 12px;
+  margin: 0 0 14px;
+}
 .weave-actions {
   display: flex;
   gap: 8px;

@@ -28,7 +28,7 @@ import {
   workStatusTint,
   categoryTint,
 } from "../data/schema";
-import { label, fmtDate, noteHref } from "../lib/format";
+import { label, fmtDate, ghLinkUrl, noteHref } from "../lib/format";
 
 function primaryTag(note: Note): string {
   const tags = (note.tags ?? []).map((t) => t.replace(/^#/, ""));
@@ -187,7 +187,7 @@ function WorkMeta({ note }: { note: Note }) {
               <a
                 key={g}
                 className="linked-item mono"
-                href={`https://github.com/openparachute/${g.replace("#", "/issues/")}`}
+                href={ghLinkUrl(g)}
                 target="_blank"
                 rel="noreferrer"
               >
