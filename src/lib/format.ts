@@ -51,6 +51,38 @@ export function noteHref(idOrPath: string): string {
   return `/n/${encodeURI(idOrPath)}`;
 }
 
+/**
+ * Map a `gh_links` token to its real GitHub URL.
+ *
+ * Work notes store gh_links as short repo slugs + an optional issue/PR number,
+ * e.g. "hub#480", "vault#412", "surface#61", "patterns#91". The short slug maps
+ * to the full repo under the ParachuteComputer org (NOT `openparachute` — that's
+ * only the npm scope). Already-full slugs ("parachute-brain", "parachute.computer")
+ * pass through unchanged. GitHub auto-redirects /issues/<n> → /pull/<n> for PRs,
+ * so /issues/<n> is correct for both issues and PRs.
+ */
+const GH_SLUG_MAP: Record<string, string> = {
+  hub: "parachute-hub",
+  vault: "parachute-vault",
+  surface: "parachute-surface",
+  scribe: "parachute-scribe",
+  runner: "parachute-runner",
+  patterns: "parachute-patterns",
+  workspace: "parachute-workspace",
+  brain: "parachute-brain",
+  channel: "parachute-channel",
+  site: "parachute.computer",
+};
+
+export function ghLinkUrl(token: string): string {
+  const hash = token.indexOf("#");
+  const slug = hash === -1 ? token : token.slice(0, hash);
+  const num = hash === -1 ? "" : token.slice(hash + 1);
+  const full = slug.startsWith("parachute") ? slug : GH_SLUG_MAP[slug] ?? slug;
+  const base = `https://github.com/ParachuteComputer/${full}`;
+  return num ? `${base}/issues/${num}` : base;
+}
+
 /** Kebab slug for note paths (shared by meeting intake + the weave apply). */
 export function slugify(s: string, fallback = "note"): string {
   return (

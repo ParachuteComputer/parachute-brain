@@ -9,7 +9,6 @@ import { useSession } from "../data/SessionContext";
 
 const NAV = [
   { to: "/", label: "Today", end: true },
-  { to: "/now", label: "Now" },
   { to: "/work", label: "Work" },
   { to: "/decisions", label: "Decisions" },
   { to: "/strategy", label: "Strategy" },

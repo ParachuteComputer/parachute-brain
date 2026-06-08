@@ -15,6 +15,20 @@ import { label, slugify, staggerStyle, todayISO } from "../lib/format";
 
 type Resolution = "approved" | "rejected";
 
+/**
+ * First non-blank, non-heading line of a note's markdown body — the last-resort
+ * summary fallback when a proposal carries neither entity_summary nor evidence.
+ */
+function firstMeaningfulLine(content?: string): string | undefined {
+  if (!content) return undefined;
+  for (const raw of content.split("\n")) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    return line.replace(/^>\s*/, "");
+  }
+  return undefined;
+}
+
 export function Weave() {
   const { data, loading, error } = useNotes({
     tag: "proposal",
@@ -27,6 +41,11 @@ export function Weave() {
   const [resolved, setResolved] = useState<Record<string, Resolution>>({});
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  // Proposals we refused to apply because no non-empty summary could be
+  // derived — surfaced inline so a human knows to regenerate the proposal.
+  const [missingSummary, setMissingSummary] = useState<Record<string, boolean>>(
+    {},
+  );
 
   const proposals = useMemo(() => (data ?? []).map(toProposal), [data]);
   const pending = proposals.filter(
@@ -46,6 +65,12 @@ export function Weave() {
   async function resolve(p: Proposal, resolution: Resolution) {
     setPendingAction(p.id);
     setActionError(null);
+    setMissingSummary((s) => {
+      if (!s[p.id]) return s;
+      const next = { ...s };
+      delete next[p.id];
+      return next;
+    });
     // Optimistic.
     setResolved((r) => ({ ...r, [p.id]: resolution }));
     try {
@@ -65,13 +90,34 @@ export function Weave() {
           typeof m.entity_summary === "string" && m.entity_summary
             ? m.entity_summary
             : undefined;
+        // A note must never be minted with an empty summary. Fall back through
+        // entity_summary → evidence → the proposal's own first meaningful line
+        // (skipping headings + blanks) → the entity name. If even that is
+        // empty, refuse to write: surface a "regenerate" state and leave the
+        // proposal pending (see the guard below).
+        const resolvedSummary = (
+          entitySummary ||
+          p.evidence ||
+          firstMeaningfulLine(p.note.content) ||
+          name
+        ).trim();
+        if (!resolvedSummary) {
+          setResolved((r) => {
+            const next = { ...r };
+            delete next[p.id];
+            return next;
+          });
+          setMissingSummary((s) => ({ ...s, [p.id]: true }));
+          setPendingAction(null);
+          return;
+        }
         // Dated paths: prefer a YYYY-MM-DD from the evidence (usually the
         // source meeting's path), else today.
         const evDate =
           (p.evidence ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? todayISO();
         let path = `Entities/${safeName}`;
         let metadata: Record<string, unknown> = {
-          summary: entitySummary ?? p.evidence ?? "",
+          summary: resolvedSummary,
         };
         switch (p.entityType) {
           case "person":
@@ -127,7 +173,7 @@ export function Weave() {
         await createNote({
           content: [
             `# ${name}`,
-            entitySummary,
+            entitySummary ?? resolvedSummary,
             p.evidence ? `> ${p.evidence}` : "",
           ]
             .filter(Boolean)
@@ -211,6 +257,11 @@ export function Weave() {
                     </div>
                     {p.evidence && (
                       <p className="weave-evidence">{p.evidence}</p>
+                    )}
+                    {missingSummary[p.id] && (
+                      <p className="weave-missing-summary" role="alert">
+                        Proposal missing summary — regenerate.
+                      </p>
                     )}
                     {typeof p.confidence === "number" && (
                       <div style={{ marginBottom: 14 }}>
