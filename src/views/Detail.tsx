@@ -140,7 +140,9 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
  */
 function TheCallCallout({ note }: { note: Note }) {
   const w = toWork(note);
-  if (!w.needsDecision && !w.theCall) return null;
+  // Only when the arc is ACTIVELY waiting — a stale the_call on a resolved
+  // arc shouldn't keep surfacing the callout.
+  if (!w.needsDecision) return null;
   return (
     <div className="call-callout">
       <p className="eyebrow">Waiting on your call</p>

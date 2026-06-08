@@ -250,7 +250,7 @@ export const WORK: Note[] = [
     {
       kind: "plan",
       status: "shipped",
-      priority: "now",
+      priority: "later",
       assignee: "lucian",
       summary:
         "Retire pvt_* tokens via capability attenuation; self-heal origin-pinned credentials on expose. The class behind the recurring \"not signed in to the hub\".",

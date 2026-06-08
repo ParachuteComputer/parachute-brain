@@ -224,9 +224,9 @@ export function Today() {
 }
 
 /**
- * Focus sort key (lower = higher up). in-progress floats to the top; blocked
- * sinks to the bottom but isn't dropped; everything else ranks by the
- * now/next/later horizon. Ties break by priority then title for stability.
+ * Focus sort key (lower = higher up). in-progress / in-review share the top
+ * band; blocked sinks to the bottom but isn't dropped; everything else sits in
+ * between. Within a band, the now/next/later horizon refines the order.
  */
 function focusScore(w: Work): number {
   // status bucket — coarse band, then priority refines within it.

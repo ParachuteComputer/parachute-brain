@@ -313,11 +313,6 @@ export function priorityRank(p?: string): number {
   return p && p in PRIORITY_RANK ? PRIORITY_RANK[p]! : 99;
 }
 
-/** Whether a raw priority string is one of the canonical now/next/later set. */
-export function isKnownPriority(p?: string): p is WorkPriority {
-  return p === "now" || p === "next" || p === "later";
-}
-
 /**
  * Feedback-theme severity tint — DISTINCT from work priority. Stays p0/p1/p2;
  * p0 reads most urgent (terracotta), p1 amber, p2 stone.
