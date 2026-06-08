@@ -27,10 +27,13 @@ export function WorkCard({
     <Link to={noteHref(work.path)} className="card card-hover work-card">
       <div className="work-card-title">{work.title}</div>
       <div className="work-card-meta">
-        {work.priority && (
-          <Pill tint={priorityTint(work.priority)}>
-            {work.priority.toUpperCase()}
+        {work.needsDecision && (
+          <Pill tint="terracotta" dot>
+            Needs decision
           </Pill>
+        )}
+        {work.priority && (
+          <Pill tint={priorityTint(work.priority)}>{label(work.priority)}</Pill>
         )}
         {work.kind && (
           <Pill tint={kindTint(work.kind)} dot>

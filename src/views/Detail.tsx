@@ -25,6 +25,7 @@ import {
   priorityTint,
   proposalTint,
   relationTint,
+  severityTint,
   workStatusTint,
   categoryTint,
 } from "../data/schema";
@@ -100,6 +101,7 @@ export function Detail() {
 
       <div className="detail-layout">
         <article>
+          {tag === "work" && <TheCallCallout note={note} />}
           <NoteBody note={note} stripLeadingH1 />
         </article>
 
@@ -132,6 +134,25 @@ function Block({ title, children }: { title: string; children: React.ReactNode }
   );
 }
 
+/**
+ * The "the_call" callout — a calm, prominent statement of the actual decision
+ * a needs-decision work arc is waiting on, shown atop the work detail body.
+ */
+function TheCallCallout({ note }: { note: Note }) {
+  const w = toWork(note);
+  if (!w.needsDecision && !w.theCall) return null;
+  return (
+    <div className="call-callout">
+      <p className="eyebrow">Waiting on your call</p>
+      {w.theCall ? (
+        <p className="call-callout-text">{w.theCall}</p>
+      ) : (
+        <p className="call-callout-text">This arc needs a decision.</p>
+      )}
+    </div>
+  );
+}
+
 function WorkMeta({ note }: { note: Note }) {
   const w = toWork(note);
   return (
@@ -148,8 +169,16 @@ function WorkMeta({ note }: { note: Note }) {
           <KV
             k="priority"
             v={
-              <Pill tint={priorityTint(w.priority)}>
-                {w.priority.toUpperCase()}
+              <Pill tint={priorityTint(w.priority)}>{label(w.priority)}</Pill>
+            }
+          />
+        )}
+        {w.needsDecision && (
+          <KV
+            k="decision"
+            v={
+              <Pill tint="terracotta" dot>
+                Needs decision
               </Pill>
             }
           />
@@ -314,7 +343,7 @@ function FeedbackMeta({ note }: { note: Note }) {
           <KV
             k="severity"
             v={
-              <Pill tint={priorityTint(t.severity)}>
+              <Pill tint={severityTint(t.severity)}>
                 {t.severity.toUpperCase()}
               </Pill>
             }

@@ -21,11 +21,11 @@ import type {
   ModuleStatus,
   Org,
   Person,
-  Priority,
   Proposal,
   ProposalStatus,
   Relation,
   Repo,
+  Severity,
   Strategy,
   StrategyKind,
   StrategyStatus,
@@ -108,17 +108,27 @@ export function toOrg(n: Note): Org {
   return { ...base(n), kind: str(m.kind), affiliation: str(m.affiliation) };
 }
 
+function bool(v: unknown): boolean {
+  if (typeof v === "boolean") return v;
+  if (typeof v === "string") return v === "true" || v === "1" || v === "yes";
+  return false;
+}
+
 export function toWork(n: Note): Work {
   const m = meta(n);
   return {
     ...base(n),
     kind: str(m.kind) as WorkKind | undefined,
     status: str(m.status) as WorkStatus | undefined,
-    priority: str(m.priority) as Priority | undefined,
+    // Kept as a raw string — live data is mid-migration off p0/p1/p2, so the
+    // tint + sort helpers tolerate unknown values rather than assert a type.
+    priority: str(m.priority),
     assignee: str(m.assignee),
     target: str(m.target),
     ghLinks: strArr(m.gh_links),
     repos: reposOf(n),
+    needsDecision: bool(m.needs_decision),
+    theCall: str(m.the_call),
   };
 }
 
@@ -160,7 +170,7 @@ export function toFeedbackTheme(n: Note): FeedbackTheme {
     ...base(n),
     status: str(m.status) as FeedbackStatus | undefined,
     category: str(m.category) as FeedbackCategory | undefined,
-    severity: str(m.severity) as Priority | undefined,
+    severity: str(m.severity) as Severity | undefined,
     captureCount: num(m.capture_count),
   };
 }
