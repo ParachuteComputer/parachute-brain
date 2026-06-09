@@ -9,7 +9,7 @@
  * The arc board (Work) deliberately never lists tasks — `task` is a SIBLING tag
  * of `work` — so this is the one place the layer surfaces against its arc.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "react-router-dom";
 import type { Note } from "@openparachute/surface-client";
 import { addNoteLinks, createNote, isDemo, queryNotes, updateNote } from "../data/vault";
@@ -101,7 +101,7 @@ export function TaskRow({
 
         {hasDetails && (
           <details className="task-details">
-            <summary>details</summary>
+            <summary>Done-when + code paths</summary>
             <div className="task-details-body">
               {task.definitionOfDone && (
                 <p className="task-dod">
@@ -133,14 +133,24 @@ export function ArcTasks({
   arcPath: string;
   arcNote: Note;
 }) {
-  const demo = isDemo();
   const [tasks, setTasks] = useState<Task[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [busy, setBusy] = useState<string | null>(null);
+  // One Done at a time across the whole panel — a global gate, not per-id, so
+  // two Done clicks can't race the arc-content append concurrently.
+  const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   // Bump to re-pull after a write (Done / Add).
   const [refreshKey, setRefreshKey] = useState(0);
+  // The latest arc body. `arcNote.content` is frozen at page load, so we keep a
+  // mutable copy and append each Done's log line to *this* — otherwise a second
+  // Done in the same visit would build on the stale prop and its force-write
+  // would clobber the first Done's arc-log line. Re-seeded if the prop changes
+  // (navigating to a different arc).
+  const arcContentRef = useRef(arcNote.content ?? "");
+  useEffect(() => {
+    arcContentRef.current = arcNote.content ?? "";
+  }, [arcNote.content]);
 
   useEffect(() => {
     // `loading` is seeded true and only flipped false once a fetch settles —
@@ -178,18 +188,27 @@ export function ArcTasks({
    * Mark a task done. LOG-LINE-FIRST: append a completion line to the ARC body
    * before flipping the task status, so a failed second write leaves the task
    * open (recoverable) rather than silently closed-but-unlogged.
+   *
+   * Builds on `arcContentRef`, not the frozen `arcNote.content` prop, and only
+   * advances the ref AFTER the arc write succeeds — so a sequence of Dones in
+   * one visit accumulates every log line instead of the later one clobbering
+   * the earlier. The global `busy` gate prevents two writes overlapping.
    */
   async function markDone(task: Task) {
-    setBusy(task.id);
+    if (busy) return;
+    setBusy(true);
     setError(null);
     // Optimistic: drop it from the live list.
     setTasks((ts) => ts.filter((t) => t.id !== task.id));
     try {
       const line = `\n- [done ${todayISO()}] ${task.goal ?? task.title}`;
+      const nextContent = arcContentRef.current + line;
       await updateNote(arcPath, {
-        content: (arcNote.content ?? "") + line,
+        content: nextContent,
         force: true,
       });
+      // Arc write landed — advance the ref so the next Done builds on this.
+      arcContentRef.current = nextContent;
       await updateNote(task.path, {
         metadata: { status: "done" },
         force: true,
@@ -202,7 +221,7 @@ export function ArcTasks({
       // Roll the row back in.
       setRefreshKey((k) => k + 1);
     } finally {
-      setBusy(null);
+      setBusy(false);
     }
   }
 
@@ -236,10 +255,10 @@ export function ArcTasks({
                 <button
                   type="button"
                   className="btn btn-soft task-done-btn"
-                  disabled={busy === t.id}
+                  disabled={busy}
                   onClick={() => void markDone(t)}
                 >
-                  {busy === t.id ? "…" : "Done"}
+                  Done
                 </button>
               }
             />
@@ -265,12 +284,6 @@ export function ArcTasks({
         >
           + Add task
         </button>
-      )}
-
-      {demo && adding && (
-        <p className="field-hint" style={{ marginTop: 6 }}>
-          Demo mode — connect to the vault to save real tasks.
-        </p>
       )}
     </section>
   );
@@ -418,7 +431,9 @@ function AddTaskForm({
           </select>
         </div>
         <div className="field add-task-ready">
-          <label htmlFor="at-ready">Ready</label>
+          {/* Caption is a plain span — the wrapping <label> below owns the
+              input, so a second htmlFor label would double-associate it. */}
+          <span className="field-caption">Ready</span>
           <label className="ready-check">
             <input
               id="at-ready"
@@ -433,6 +448,11 @@ function AddTaskForm({
 
       <div className="modal-actions">
         {error && <span className="modal-error">{error}</span>}
+        {demo && !error && (
+          <span className="modal-error" style={{ color: "var(--fg-dim)" }}>
+            Demo mode — connect to the vault to save real tasks.
+          </span>
+        )}
         <button type="button" className="btn btn-ghost" onClick={onCancel}>
           Cancel
         </button>
