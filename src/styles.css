@@ -999,13 +999,6 @@ button.row {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
-.linked-rel {
-  font-family: var(--font-mono);
-  font-size: 0.66rem;
-  color: var(--fg-dim);
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-}
 
 /* --- Connections (graph-edge) panel --- */
 .connections {

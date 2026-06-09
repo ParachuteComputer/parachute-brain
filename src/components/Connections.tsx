@@ -91,6 +91,11 @@ export function Connections({
     // does (self-loop or echoed oddly), treat sourceId===selfId as outbound.
     const inbound = l.targetId === selfId && !outbound;
 
+    // Defensive: a link where neither end is self can't resolve a coherent
+    // "other end" — skip it rather than render corrupt data. The live API
+    // won't echo these; this makes the intent explicit.
+    if (!outbound && !inbound) return;
+
     // Skip inbound part_of — those are the arc's tasks, rendered by <ArcTasks>.
     if (inbound && l.relationship === "part_of") return;
 
