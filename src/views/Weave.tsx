@@ -7,7 +7,7 @@
 import { useMemo, useState } from "react";
 import { useNotes } from "../data/useNotes";
 import { toProposal } from "../data/model";
-import { createNote, updateNote } from "../data/vault";
+import { addNoteLinks, createNote, updateNote } from "../data/vault";
 import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import type { Proposal } from "../data/schema";
@@ -119,6 +119,10 @@ export function Weave() {
         let metadata: Record<string, unknown> = {
           summary: resolvedSummary,
         };
+        // Tags beyond the entity-type tag (tasks also carry the arc's repo
+        // tags) + an optional part_of link to wire the new note into the graph.
+        let extraTags: string[] = [];
+        let linkTarget: string | null = null;
         switch (p.entityType) {
           case "person":
             path = `People/${safeName}`;
@@ -169,8 +173,39 @@ export function Weave() {
               severity: "",
             };
             break;
+          case "task": {
+            // A task minted from a meeting → its arc. The arc path comes from
+            // the proposal's metadata (arc_path); derive the repo from it, and
+            // hang the task under the arc with a part_of link (skipped if the
+            // arc is blank — the task still stands alone, just unparented).
+            const arcPath =
+              typeof m.arc_path === "string" ? m.arc_path.trim() : "";
+            const arcTail = arcPath ? arcPath.split("/").pop() ?? arcPath : "";
+            const arcRepo =
+              typeof m.repo === "string" && m.repo
+                ? m.repo
+                : arcTail.match(/parachute[-.][a-z]+/)?.[0] ?? "";
+            path = `Tasks/${arcTail ? slugify(arcTail) + "-" : ""}${slug}`;
+            metadata = {
+              goal: name,
+              summary: resolvedSummary,
+              definition_of_done: entitySummary ?? resolvedSummary,
+              next_action: "",
+              code_paths: [],
+              ready: false,
+              status: "todo",
+              priority: "next",
+              arc: arcPath,
+              repo: arcRepo,
+              claimed_by: "",
+              claim_expires: "",
+            };
+            if (arcRepo) extraTags = [`repo/${arcRepo}`];
+            if (arcPath) linkTarget = arcPath;
+            break;
+          }
         }
-        await createNote({
+        const created = await createNote({
           content: [
             `# ${name}`,
             entitySummary ?? resolvedSummary,
@@ -179,9 +214,18 @@ export function Weave() {
             .filter(Boolean)
             .join("\n\n"),
           path,
-          tags: [p.entityType ?? "entity"],
+          tags: [p.entityType ?? "entity", ...extraTags],
           metadata,
         });
+        if (linkTarget) {
+          try {
+            await addNoteLinks(created.id, [
+              { target: linkTarget, relationship: "part_of" },
+            ]);
+          } catch {
+            // Non-fatal: the `arc` metadata mirror already sources the task.
+          }
+        }
       }
       // Link approvals are still mark-only: applying the edge needs a
       // source_path on the proposal (a weave-prompt addition) before the

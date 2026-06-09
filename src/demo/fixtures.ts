@@ -391,6 +391,84 @@ export const WORK: Note[] = [
   ),
 ];
 
+// ----------------------------------------------------------------- Tasks ----
+// Pickup-able units under an arc (`task` is a SIBLING of `work`). All three
+// hang off the EXISTING `Work/build-parachute-brain-surface` arc (w-brain) via
+// the `arc` metadata mirror — so Detail (the arc page) + Home both render them.
+
+export const TASKS: Note[] = [
+  note(
+    "t-task-layer",
+    "Tasks/build-parachute-brain-surface-task-layer-ui",
+    ["task", "repo/parachute-brain"],
+    {
+      goal: "Build the task-layer UI (ArcTasks + Home pickup lane)",
+      definition_of_done:
+        "An arc Detail page lists its open tasks with a Done button + inline Add form; Home shows a 'Ready to pick up' lane.",
+      next_action:
+        "Add ArcTasks.tsx and wire it into Detail + Today, sourcing tasks by the `arc` metadata mirror.",
+      code_paths: [
+        "src/components/ArcTasks.tsx",
+        "src/views/Detail.tsx",
+        "src/views/Today.tsx",
+      ],
+      ready: true,
+      status: "todo",
+      priority: "now",
+      arc: "Work/build-parachute-brain-surface",
+      repo: "parachute-brain",
+      claimed_by: "",
+      claim_expires: "",
+    },
+    "# Build the task-layer UI\n\n## Goal\nMake tasks pickup-able from the arc page and the morning brief.\n## Definition of done\nArcTasks renders an arc's tasks; Home surfaces a ready-to-pick-up lane.\n## Next action\nAdd ArcTasks.tsx and wire it into Detail + Today.\n",
+  ),
+  note(
+    "t-count-chip",
+    "Tasks/build-parachute-brain-surface-worktasks-count-chip",
+    ["task", "repo/parachute-brain"],
+    {
+      goal: "Add a 'N tasks · M ready' chip to arc cards on the Work board",
+      definition_of_done:
+        "Each arc card on /work shows a count of its open tasks and how many are ready, without listing the tasks (the arc board stays clean).",
+      next_action:
+        "Group tag:task by arc in the Work projection + render a small chip on WorkCard.",
+      code_paths: ["src/views/Work.tsx", "src/components/WorkCard.tsx"],
+      ready: false,
+      status: "todo",
+      priority: "next",
+      arc: "Work/build-parachute-brain-surface",
+      repo: "parachute-brain",
+      claimed_by: "",
+      claim_expires: "",
+    },
+    "# Add a 'N tasks · M ready' chip to arc cards\n\n## Goal\nLet the Work board hint at task volume per arc without listing tasks.\n## Definition of done\nA small count chip on each arc card.\n## Next action\nGroup tasks by arc + render the chip.\n",
+  ),
+  note(
+    "t-modal-polish",
+    "Tasks/build-parachute-brain-surface-modal-polish",
+    ["task", "repo/parachute-brain"],
+    {
+      goal: "Modal polish — reset form state on close + duplicate-path error",
+      definition_of_done:
+        "The Add forms reset on close and surface a friendly 'a note already exists at that path' message instead of a raw failure.",
+      next_action: "Audit the create-form close handlers + the createNote error path.",
+      code_paths: [
+        "src/components/AddMeetingModal.tsx",
+        "src/components/AddFeedbackModal.tsx",
+      ],
+      ready: true,
+      status: "todo",
+      priority: "later",
+      arc: "Work/build-parachute-brain-surface",
+      repo: "parachute-brain",
+      // A LIVE soft claim — benjamin holds it (far-future expiry, demo-anchored).
+      claimed_by: "benjamin",
+      claim_expires: "2026-12-31T00:00:00Z",
+    },
+    "# Modal polish\n\n## Goal\nSmall correctness + ergonomics fixes on the create forms.\n## Definition of done\nForms reset on close; friendly duplicate-path error.\n## Next action\nAudit the close handlers + error path.\n",
+  ),
+];
+
 // ------------------------------------------------------------- Decisions ----
 
 export const DECISIONS: Note[] = [
@@ -867,6 +945,7 @@ export const ALL_NOTES: Note[] = [
   ...PEOPLE,
   ...ORGS,
   ...WORK,
+  ...TASKS,
   ...DECISIONS,
   ...STRATEGY,
   ...MEETINGS,

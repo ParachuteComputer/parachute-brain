@@ -1596,3 +1596,193 @@ button.row {
   display: flex;
   gap: 10px;
 }
+
+/* --- Task layer (ArcTasks + Home pickup lane) ----------------------------- */
+
+/* The task block under an arc's body on its Detail page. A hairline rule sets
+   it apart from the prose above without shouting. */
+.arc-tasks {
+  margin-top: 40px;
+  padding-top: 28px;
+  border-top: 1px solid var(--border);
+}
+.arc-tasks-head {
+  margin-bottom: 16px;
+}
+.arc-tasks-title {
+  font-family: var(--font-display);
+  font-size: 1.3rem;
+  letter-spacing: -0.02em;
+}
+
+.task-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* A single pickup-able task — calm, low-temperature. Shared by the arc list
+   and Home's "Ready to pick up" lane. */
+.task-row {
+  padding: 16px 18px;
+}
+.task-row-main {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.task-row-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 14px;
+}
+.task-row-title {
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.4;
+  color: var(--fg);
+  text-decoration: none;
+}
+.task-row-title:hover {
+  color: var(--accent);
+}
+.task-row-meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+.task-claimed-by {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+}
+/* The next action — always visible; it's the point of a task. Dimmed so it
+   reads as a quiet instruction, not a heading. */
+.task-next-action {
+  font-size: 0.9rem;
+  line-height: 1.5;
+  color: var(--fg-muted);
+  margin: 0;
+}
+
+/* The collapsed disclosure: definition-of-done + code paths, out of the way
+   until wanted. */
+.task-details {
+  margin-top: 2px;
+}
+.task-details > summary {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--fg-dim);
+  cursor: pointer;
+  list-style: none;
+  width: fit-content;
+}
+.task-details > summary::-webkit-details-marker {
+  display: none;
+}
+.task-details > summary::before {
+  content: "▸ ";
+  display: inline-block;
+  transition: transform var(--ease);
+}
+.task-details[open] > summary::before {
+  content: "▾ ";
+}
+.task-details > summary:hover {
+  color: var(--fg-muted);
+}
+.task-details-body {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.task-dod {
+  font-size: 0.9rem;
+  line-height: 1.55;
+  color: var(--fg-muted);
+  margin: 0;
+}
+.task-dod-label {
+  font-weight: 500;
+  color: var(--fg);
+}
+.task-code-paths {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.task-code-chip {
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--bg-soft);
+  font-size: 0.7rem;
+  color: var(--fg-muted);
+  white-space: nowrap;
+}
+
+/* The per-row Done button — soft, never the loudest thing on the row. */
+.task-done-btn {
+  flex-shrink: 0;
+  padding: 5px 14px;
+  font-size: 0.82rem;
+}
+
+/* Home: the faint "in {arc}" link trailing a pickup-lane row's meta. */
+.task-arc-link {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  text-decoration: none;
+}
+.task-arc-link:hover {
+  color: var(--accent);
+}
+.task-more-link {
+  align-self: flex-start;
+  margin-top: 2px;
+}
+.task-error {
+  font-size: 0.85rem;
+  color: var(--tint-terracotta-fg, #a4543a);
+  margin-bottom: 12px;
+}
+
+/* "+ Add task" + the inline add form. */
+.arc-add-task {
+  margin-top: 14px;
+  padding: 8px 14px;
+  font-size: 0.85rem;
+}
+.add-task-form {
+  margin-top: 14px;
+}
+.add-task-form .field:last-of-type {
+  margin-bottom: 16px;
+}
+.add-task-ready {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+.ready-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.88rem;
+  color: var(--fg-muted);
+  cursor: pointer;
+  text-transform: none;
+  letter-spacing: normal;
+  font-family: var(--font-body);
+}
+.ready-check input {
+  width: auto;
+  cursor: pointer;
+  accent-color: var(--accent);
+}

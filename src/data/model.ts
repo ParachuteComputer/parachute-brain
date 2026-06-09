@@ -29,6 +29,8 @@ import type {
   Strategy,
   StrategyKind,
   StrategyStatus,
+  Task,
+  TaskStatus,
   Work,
   WorkKind,
   WorkStatus,
@@ -129,6 +131,24 @@ export function toWork(n: Note): Work {
     repos: reposOf(n),
     needsDecision: bool(m.needs_decision),
     theCall: str(m.the_call),
+  };
+}
+
+export function toTask(n: Note): Task {
+  const m = meta(n);
+  return {
+    ...base(n),
+    goal: str(m.goal),
+    definitionOfDone: str(m.definition_of_done),
+    nextAction: str(m.next_action),
+    codePaths: strArr(m.code_paths),
+    ready: bool(m.ready),
+    status: str(m.status) as TaskStatus | undefined,
+    priority: str(m.priority),
+    arc: str(m.arc),
+    repo: str(m.repo),
+    claimedBy: str(m.claimed_by),
+    claimExpires: str(m.claim_expires),
   };
 }
 
