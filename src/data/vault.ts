@@ -168,7 +168,11 @@ function demoQuery(params: QueryParams): Note[] {
     if (!Number.isNaN(lim)) rows = rows.slice(0, lim);
   }
 
-  return rows.map((n) => ({ ...n }));
+  // Mirror the live REST contract: only echo a note's graph links when the
+  // caller asked for them — so card-level chips (Feedback / Decisions) get the
+  // outbound-link counts they need without every other query carrying links.
+  const withLinks = params.include_links === "true";
+  return rows.map((n) => (withLinks ? { ...n } : { ...n, links: undefined }));
 }
 
 function sortKey(n: Note, field: string): string | number {
@@ -197,7 +201,9 @@ export async function getNote(
     const n = ALL_NOTES.find(
       (x) => x.id === idOrPath || x.path === idOrPath,
     );
-    return n ? { ...n } : null;
+    if (!n) return null;
+    // Echo graph links only when asked, matching the live getNote contract.
+    return opts?.includeLinks ? { ...n } : { ...n, links: undefined };
   }
   const client = getLiveClient();
   if (!client) throw new Error("Not signed in");

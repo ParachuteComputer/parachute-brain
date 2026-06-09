@@ -4,7 +4,7 @@
  */
 import { useMemo } from "react";
 import { Link, useParams } from "react-router-dom";
-import type { Note, NoteLink } from "@openparachute/surface-client";
+import type { Note } from "@openparachute/surface-client";
 import { useNote } from "../data/useNotes";
 import {
   toDecision,
@@ -18,6 +18,7 @@ import {
 } from "../data/model";
 import { NoteBody } from "../components/NoteBody";
 import { ArcTasks } from "../components/ArcTasks";
+import { Connections } from "../components/Connections";
 import { Avatar, Loader, ErrorBox, Pill, RepoChip } from "../components/ui";
 import {
   decisionTint,
@@ -30,7 +31,7 @@ import {
   workStatusTint,
   categoryTint,
 } from "../data/schema";
-import { label, fmtDate, ghLinkUrl, noteHref } from "../lib/format";
+import { label, fmtDate, ghLinkUrl } from "../lib/format";
 
 function primaryTag(note: Note): string {
   const tags = (note.tags ?? []).map((t) => t.replace(/^#/, ""));
@@ -111,7 +112,7 @@ export function Detail() {
 
         <aside className="meta-panel">
           <MetaPanel note={note} tag={tag} />
-          <LinkedNotes links={links} selfId={note.id} />
+          <Connections links={links} selfId={note.id} />
         </aside>
       </div>
     </div>
@@ -360,27 +361,3 @@ function FeedbackMeta({ note }: { note: Note }) {
   );
 }
 
-function LinkedNotes({ links, selfId }: { links: NoteLink[]; selfId: string }) {
-  if (links.length === 0) return null;
-  return (
-    <Block title="Linked">
-      <div className="linked-list">
-        {links.map((l, i) => {
-          const other =
-            l.sourceId === selfId ? l.targetNote : l.sourceNote;
-          const otherId = l.sourceId === selfId ? l.targetId : l.sourceId;
-          const path = other?.path ?? otherId;
-          const name = other?.path
-            ? other.path.split("/").pop()
-            : otherId;
-          return (
-            <Link key={i} to={noteHref(path)} className="linked-item">
-              <span className="linked-rel">{l.relationship}</span>
-              <div>{name}</div>
-            </Link>
-          );
-        })}
-      </div>
-    </Block>
-  );
-}

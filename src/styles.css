@@ -999,12 +999,43 @@ button.row {
   border-color: var(--accent);
   background: var(--accent-soft);
 }
-.linked-rel {
+
+/* --- Connections (graph-edge) panel --- */
+.connections {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.connection-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.connection-rel {
   font-family: var(--font-mono);
   font-size: 0.66rem;
   color: var(--fg-dim);
   text-transform: uppercase;
   letter-spacing: 0.06em;
+}
+
+/* --- Card-level edge chip ("drives N", "affects N") --- */
+.card-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.edge-chip {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  color: var(--fg-dim);
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px solid var(--border-light);
+  background: var(--accent-soft);
+  white-space: nowrap;
 }
 
 /* --- Connect / sign-in --- */
