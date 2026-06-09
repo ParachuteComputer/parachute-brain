@@ -94,6 +94,22 @@ export function slugify(s: string, fallback = "note"): string {
   );
 }
 
+/**
+ * Is a task's `claim_expires` a *future* ISO instant? A future expiry means
+ * the soft claim is still live (someone holds it); empty, malformed, or past
+ * all read as unclaimed / free to pick up. Anchored to the demo seed date in
+ * demo mode so fixtures with a fixed-future expiry stay "claimed".
+ */
+export function isClaimActive(claimExpires?: string): boolean {
+  if (!claimExpires) return false;
+  const t = new Date(claimExpires).getTime();
+  if (Number.isNaN(t)) return false;
+  const now = isDemo()
+    ? new Date(todayISO() + "T00:00:00Z").getTime()
+    : Date.now();
+  return t > now;
+}
+
 /** Relative freshness: "just now", "3h ago", "2d ago". */
 export function fmtAgo(iso?: string): string {
   if (!iso) return "—";

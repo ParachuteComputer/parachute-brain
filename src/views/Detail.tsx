@@ -17,6 +17,7 @@ import {
   titleOf,
 } from "../data/model";
 import { NoteBody } from "../components/NoteBody";
+import { ArcTasks } from "../components/ArcTasks";
 import { Avatar, Loader, ErrorBox, Pill, RepoChip } from "../components/ui";
 import {
   decisionTint,
@@ -103,6 +104,9 @@ export function Detail() {
         <article>
           {tag === "work" && <TheCallCallout note={note} />}
           <NoteBody note={note} stripLeadingH1 />
+          {tag === "work" && (
+            <ArcTasks arcPath={note.path ?? note.id} arcNote={note} />
+          )}
         </article>
 
         <aside className="meta-panel">

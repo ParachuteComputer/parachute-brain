@@ -24,6 +24,21 @@ export type WorkStatus = (typeof WORK_STATUSES)[number];
 export const WORK_KINDS = ["brainstorm", "plan", "task", "bug", "chore"] as const;
 export type WorkKind = (typeof WORK_KINDS)[number];
 
+// A `task` is a pickup-able unit minted UNDER an arc (a `work` note). It's a
+// SIBLING tag of `work` — so the arc board never lists tasks — with its own
+// lifecycle. todo → claimed (an agent reserved it) → doing → done. blocked /
+// dropped are the off-ramps. The claim is soft: `claim_expires` in the future
+// means "held"; empty / past means free to grab.
+export const TASK_STATUSES = [
+  "todo",
+  "claimed",
+  "doing",
+  "blocked",
+  "done",
+  "dropped",
+] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
 // Work priority — the focus horizon. now = current focus, next = queued,
 // later = backlog. (Migrated from p0/p1/p2 on 2026-06-08; live data may still
 // carry legacy values, so projectors + tints must tolerate the unknown.)
@@ -204,6 +219,30 @@ export interface Work extends BaseEntity {
   theCall?: string;
 }
 
+export interface Task extends BaseEntity {
+  /** The one-line aim — the row title; what picking this up accomplishes. */
+  goal?: string;
+  /** The acceptance check — "done when:". */
+  definitionOfDone?: string;
+  /** The single concrete next step — always shown; it's the point of a task. */
+  nextAction?: string;
+  /** Files / locations the work touches, rendered as mono chips. */
+  codePaths?: string[];
+  /** An agent (or human) can pick this up right now. */
+  ready?: boolean;
+  status?: TaskStatus;
+  /** now / next / later — same focus horizon as work priority. */
+  priority?: string;
+  /** The arc note's path this task hangs under (metadata mirror of part_of). */
+  arc?: string;
+  /** Primary repo slug. */
+  repo?: string;
+  /** Handle of whoever holds the soft claim. */
+  claimedBy?: string;
+  /** ISO expiry of the soft claim; empty / past = unclaimed. */
+  claimExpires?: string;
+}
+
 export interface Decision extends BaseEntity {
   status?: DecisionStatus;
   scope?: DecisionScope;
@@ -284,6 +323,27 @@ export function workStatusTint(s?: WorkStatus): Tint {
     case "exploring":
     case "planned":
       return "lavender";
+    default:
+      return "stone";
+  }
+}
+
+/**
+ * Task status tint — gentle, mirroring the work palette. doing / claimed read
+ * live (sky), blocked warns (amber), done settles (forest), dropped recedes
+ * (terracotta), and a fresh todo stays neutral (stone). Never throws.
+ */
+export function taskStatusTint(s?: TaskStatus): Tint {
+  switch (s) {
+    case "doing":
+    case "claimed":
+      return "sky";
+    case "blocked":
+      return "amber";
+    case "done":
+      return "forest";
+    case "dropped":
+      return "terracotta";
     default:
       return "stone";
   }

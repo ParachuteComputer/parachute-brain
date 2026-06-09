@@ -12,8 +12,9 @@
  */
 import { Link } from "react-router-dom";
 import { useNotes } from "../data/useNotes";
-import { toProposal, toWork } from "../data/model";
+import { toProposal, toTask, toWork } from "../data/model";
 import { Loader, ErrorBox, Pill, RepoChip } from "../components/ui";
+import { TaskRow } from "../components/ArcTasks";
 import { PageHeader } from "../components/PageHeader";
 import { NoteBody } from "../components/NoteBody";
 import {
@@ -23,12 +24,16 @@ import {
   type Work,
 } from "../data/schema";
 import {
+  isClaimActive,
   label,
   fmtDate,
   noteHref,
   staggerStyle,
   todayISO,
 } from "../lib/format";
+
+// How many pickup-able tasks to show on the morning page before "N more".
+const PICKUP_CAP = 8;
 
 // Work that's genuinely "in flight or queued" — the Focus pool.
 const FOCUS_EXCLUDE = new Set(["shipped", "dropped"]);
@@ -75,11 +80,22 @@ export function Today() {
     include_metadata: "true",
     limit: "200",
   });
+  // The pickup set: ready tasks still in flight (todo / doing). Claimed rows
+  // are dropped client-side (a future claim_expires = someone holds it).
+  const pickup = useNotes({
+    tag: "task",
+    metadata: JSON.stringify({
+      ready: { eq: true },
+      status: { in: ["todo", "doing"] },
+    }),
+    include_metadata: "true",
+    limit: "200",
+  });
   const daily = useNotes({ path_prefix: `summaries/daily/${todayISO()}` });
 
-  if (work.loading || proposals.loading) return <Loader />;
+  if (work.loading || proposals.loading || pickup.loading) return <Loader />;
 
-  const err = work.error || proposals.error;
+  const err = work.error || proposals.error || pickup.error;
   if (err) return <ErrorBox message={err} />;
 
   const works = (work.data ?? []).map(toWork);
@@ -100,6 +116,16 @@ export function Today() {
   const focus = [...focusPool]
     .sort((a, b) => focusScore(a) - focusScore(b))
     .slice(0, 6);
+
+  // 3 — Ready to pick up ----------------------------------------------------
+  // ready + todo/doing tasks, minus any with a LIVE soft claim, ranked
+  // now → next → later, capped. "What can an agent grab right now."
+  const pickupAll = (pickup.data ?? [])
+    .map(toTask)
+    .filter((t) => !isClaimActive(t.claimExpires))
+    .sort((a, b) => priorityRank(a.priority) - priorityRank(b.priority));
+  const pickupShown = pickupAll.slice(0, PICKUP_CAP);
+  const pickupMore = pickupAll.length - pickupShown.length;
 
   const dailyNote = daily.data?.[0];
 
@@ -208,7 +234,52 @@ export function Today() {
         )}
       </section>
 
-      {/* 3 — What moved --------------------------------------------------- */}
+      {/* 3 — Ready to pick up --------------------------------------------- */}
+      <section className="section">
+        <div className="section-head">
+          <h2 className="section-title">Ready to pick up</h2>
+          {pickupAll.length > 0 && (
+            <span className="muted" style={{ fontSize: "0.85rem" }}>
+              {pickupAll.length} ready
+            </span>
+          )}
+        </div>
+
+        {pickupShown.length === 0 ? (
+          <div className="calm-empty fade-up">No tasks ready to pick up.</div>
+        ) : (
+          <div className="task-list">
+            {pickupShown.map((t, i) => {
+              const arcTail = t.arc ? t.arc.split("/").pop() ?? t.arc : null;
+              return (
+                <TaskRow
+                  key={t.id}
+                  task={t}
+                  i={i}
+                  trailing={
+                    arcTail && t.arc ? (
+                      <Link
+                        to={noteHref(t.arc)}
+                        className="task-arc-link"
+                        title={t.arc}
+                      >
+                        in {arcTail}
+                      </Link>
+                    ) : null
+                  }
+                />
+              );
+            })}
+            {pickupMore > 0 && (
+              <Link to="/work" className="section-link task-more-link">
+                {pickupMore} more →
+              </Link>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* 4 — What moved --------------------------------------------------- */}
       {dailyNote && (
         <section className="section">
           <div className="section-head">
