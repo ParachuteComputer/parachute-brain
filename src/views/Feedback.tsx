@@ -17,7 +17,12 @@ import {
   severityTint,
   type FeedbackStatus,
 } from "../data/schema";
-import { label, noteHref, staggerStyle } from "../lib/format";
+import {
+  countOutboundLinks,
+  label,
+  noteHref,
+  staggerStyle,
+} from "../lib/format";
 
 const SEV_RANK: Record<string, number> = { p0: 0, p1: 1, p2: 2 };
 
@@ -27,6 +32,7 @@ export function Feedback() {
   const themes = useNotes({
     tag: "feedback-theme",
     include_metadata: "true",
+    include_links: "true",
     limit: "500",
   });
   const captures = useNotes({
@@ -141,10 +147,21 @@ export function Feedback() {
                         {t.summary}
                       </p>
                     )}
-                    <span className="dim mono" style={{ fontSize: "0.72rem" }}>
-                      {t.captureCount ?? 0}{" "}
-                      {t.captureCount === 1 ? "capture" : "captures"}
-                    </span>
+                    <div className="card-foot">
+                      <span
+                        className="dim mono"
+                        style={{ fontSize: "0.72rem" }}
+                      >
+                        {t.captureCount ?? 0}{" "}
+                        {t.captureCount === 1 ? "capture" : "captures"}
+                      </span>
+                      {(() => {
+                        const drives = countOutboundLinks(t.note, "drives");
+                        return drives > 0 ? (
+                          <span className="edge-chip">drives {drives}</span>
+                        ) : null;
+                      })()}
+                    </div>
                   </Link>
                 ))}
               </div>

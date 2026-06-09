@@ -3,7 +3,20 @@
  * Kept component-free so React Fast Refresh stays happy.
  */
 import type { CSSProperties } from "react";
+import type { Note } from "@openparachute/surface-client";
 import { isDemo } from "../data/vault";
+
+/**
+ * Count a note's OUTBOUND links of a given relationship — the note is the
+ * source end (`sourceId === note.id`). Powers the at-a-glance card chips
+ * ("drives N" on a feedback theme, "affects N" on a decision). Returns 0 when
+ * the note carries no links (queried without `include_links`).
+ */
+export function countOutboundLinks(note: Note, relationship: string): number {
+  return (note.links ?? []).filter(
+    (l) => l.sourceId === note.id && l.relationship === relationship,
+  ).length;
+}
 
 /** Humanize an enum label: in-progress → In progress. */
 export function label(s?: string): string {

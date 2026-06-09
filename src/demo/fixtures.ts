@@ -5,7 +5,7 @@
  *
  * Toggled via `?demo=1` or the localStorage flag (see vault.ts).
  */
-import type { Note } from "@openparachute/surface-client";
+import type { Note, NoteLink, NoteSummary } from "@openparachute/surface-client";
 
 const TODAY = "2026-06-02";
 
@@ -27,6 +27,29 @@ function note(
     updatedAt: createdAt,
     preview: typeof metadata.summary === "string" ? metadata.summary : undefined,
   };
+}
+
+/**
+ * Minimal NoteSummary for the OTHER end of a demo link — just enough for the
+ * Connections panel to resolve a title + href (path + metadata.title/summary).
+ * Mirrors the shape the live vault inlines via `include_links`.
+ */
+function summary(
+  id: string,
+  path: string,
+  metadata: Record<string, unknown> = {},
+): NoteSummary {
+  return { id, path, metadata };
+}
+
+/**
+ * Attach typed graph links to a demo note (mutates + returns it). Each link is
+ * shaped like a real one: sourceId / targetId / relationship plus the inlined
+ * source/target NoteSummary so titles render without a second fetch.
+ */
+function linked(n: Note, links: NoteLink[]): Note {
+  n.links = links;
+  return n;
 }
 
 // ---------------------------------------------------------------- People ----
@@ -334,20 +357,45 @@ export const WORK: Note[] = [
     },
     "# Cloudflare per-host tunnel\n\nTunnels are account-wide; a fixed `DEFAULT_TUNNEL_NAME=\"parachute\"` made two machines share one tunnel UUID → CF load-balanced connectors → cross-host 404s.\n\nShipped: per-host tunnel (hub 0.6.1, #491); reboot-persistent connector (hub 0.6.2, #493). Headless non-root boxes need `loginctl enable-linger` (#494).",
   ),
-  note(
-    "w-brain",
-    "Work/build-parachute-brain-surface",
-    ["work", "repo/parachute-surface"],
-    {
-      kind: "plan",
-      status: "planned",
-      priority: "now",
-      assignee: "aaron",
-      summary:
-        "Build Parachute Brain — the team's internal web surface over the project vault. Calm, on-brand, the at-a-glance team-sync home.",
-      target: "2026-06-10",
-    },
-    "# Build Parachute Brain\n\nTHE internal surface for the team. Today / Work / Decisions / Feedback / Meetings / Team / Weave. Embodies the brand: calm, crafted, open sky. Built on surface-client + surface-render.",
+  linked(
+    note(
+      "w-brain",
+      "Work/build-parachute-brain-surface",
+      ["work", "repo/parachute-surface"],
+      {
+        kind: "plan",
+        status: "planned",
+        priority: "now",
+        assignee: "aaron",
+        summary:
+          "Build Parachute Brain — the team's internal web surface over the project vault. Calm, on-brand, the at-a-glance team-sync home.",
+        target: "2026-06-10",
+      },
+      "# Build Parachute Brain\n\nTHE internal surface for the team. Today / Work / Decisions / Feedback / Meetings / Team / Weave. Embodies the brand: calm, crafted, open sky. Built on surface-client + surface-render.",
+    ),
+    [
+      // INBOUND part_of ← this arc's tasks. Connections SKIPS these (they're
+      // already rendered by <ArcTasks>); included here to exercise that skip so
+      // the arc detail doesn't double up its task list.
+      {
+        sourceId: "t-task-layer",
+        targetId: "w-brain",
+        relationship: "part_of",
+        sourceNote: summary(
+          "t-task-layer",
+          "Tasks/build-parachute-brain-surface-task-layer-ui",
+        ),
+      },
+      {
+        sourceId: "t-count-chip",
+        targetId: "w-brain",
+        relationship: "part_of",
+        sourceNote: summary(
+          "t-count-chip",
+          "Tasks/build-parachute-brain-surface-worktasks-count-chip",
+        ),
+      },
+    ],
   ),
   note(
     "w-weave-job",
@@ -472,19 +520,34 @@ export const TASKS: Note[] = [
 // ------------------------------------------------------------- Decisions ----
 
 export const DECISIONS: Note[] = [
-  note(
-    "d-supervisor",
-    "Decisions/2026-06-01-hub-as-supervisor",
-    ["decision"],
-    {
-      status: "accepted",
-      scope: "technical",
-      decided_on: "2026-06-01",
-      summary:
-        "Unify all deploys on hub-as-supervisor (`parachute serve`, modules as children) under a per-platform process manager. Retire the manager-less detached-daemon model.",
-    },
-    "# Hub-as-supervisor unification\n\n**Accepted 2026-06-01.**\n\nThe detached-daemon model splits EC2 from Render, blocks UI module-management, and doesn't survive reboot. We unify on `parachute serve` — hub supervises modules as children — under systemd / launchd / container per platform.\n\nPhased and gated. Design-doc first.",
-    "2026-06-01T17:00:00Z",
+  linked(
+    note(
+      "d-supervisor",
+      "Decisions/2026-06-01-hub-as-supervisor",
+      ["decision"],
+      {
+        status: "accepted",
+        scope: "technical",
+        decided_on: "2026-06-01",
+        summary:
+          "Unify all deploys on hub-as-supervisor (`parachute serve`, modules as children) under a per-platform process manager. Retire the manager-less detached-daemon model.",
+      },
+      "# Hub-as-supervisor unification\n\n**Accepted 2026-06-01.**\n\nThe detached-daemon model splits EC2 from Render, blocks UI module-management, and doesn't survive reboot. We unify on `parachute serve` — hub supervises modules as children — under systemd / launchd / container per platform.\n\nPhased and gated. Design-doc first.",
+      "2026-06-01T17:00:00Z",
+    ),
+    [
+      // OUTBOUND affects → the work arc this decision steers. Powers the row's
+      // "affects 1" chip + the detail Connections "Affects" group.
+      {
+        sourceId: "d-supervisor",
+        targetId: "w-supervisor",
+        relationship: "affects",
+        targetNote: summary(
+          "w-supervisor",
+          "Work/hub-as-supervisor-unification",
+        ),
+      },
+    ],
   ),
   note(
     "d-fly",
@@ -562,19 +625,38 @@ export const MEETINGS: Note[] = [
     "# Parachute Weekly — 2026-06-02\n\n_Scheduled._\n\nAgenda:\n- Hub-as-supervisor design doc — first read\n- Stable @latest release: are we ready to drop the -rc?\n- Parachute Brain — demo the internal surface",
     "2026-06-02T16:00:00Z",
   ),
-  note(
-    "m-weekly-0526",
-    "Meetings/2026-05-26-parachute-weekly",
-    ["meeting"],
-    {
-      series: "parachute-weekly",
-      held_on: "2026-05-26",
-      status: "governed",
-      summary:
-        "Weekly sync. Produced the Fly-as-peer decision. Confirmed Render stays primary self-host framing.",
-    },
-    "# Parachute Weekly — 2026-05-26\n\n_Governed — produced 1 decision._\n\nDiscussed Fly as a self-host target. Landed on **peer, not replacement**. Render framing stays primary.\n\nProduced: [[Decisions/2026-05-26-fly-as-peer]]",
-    "2026-05-26T16:00:00Z",
+  linked(
+    note(
+      "m-weekly-0526",
+      "Meetings/2026-05-26-parachute-weekly",
+      ["meeting"],
+      {
+        series: "parachute-weekly",
+        held_on: "2026-05-26",
+        status: "governed",
+        summary:
+          "Weekly sync. Produced the Fly-as-peer decision. Confirmed Render stays primary self-host framing.",
+      },
+      "# Parachute Weekly — 2026-05-26\n\n_Governed — produced 1 decision._\n\nDiscussed Fly as a self-host target. Landed on **peer, not replacement**. Render framing stays primary.\n\nProduced: [[Decisions/2026-05-26-fly-as-peer]]",
+      "2026-05-26T16:00:00Z",
+    ),
+    [
+      // OUTBOUND mentions → a person named in the transcript. Renders as the
+      // detail Connections "Mentions" group.
+      {
+        sourceId: "m-weekly-0526",
+        targetId: "p-aaron",
+        relationship: "mentions",
+        targetNote: summary("p-aaron", "People/Aaron Gabriel Neyer"),
+      },
+      // OUTBOUND produced → the decision this meeting governed into being.
+      {
+        sourceId: "m-weekly-0526",
+        targetId: "d-fly",
+        relationship: "produced",
+        targetNote: summary("d-fly", "Decisions/2026-05-26-fly-as-peer"),
+      },
+    ],
   ),
   note(
     "m-lca-0524",
@@ -622,19 +704,45 @@ export const MEETINGS: Note[] = [
 // -------------------------------------------------------------- Feedback ----
 
 export const FEEDBACK_THEMES: Note[] = [
-  note(
-    "ft-auth-friction",
-    "Feedback/themes/expose-connect-auth-friction",
-    ["feedback-theme"],
-    {
-      status: "addressing",
-      category: "dx-gap",
-      severity: "p1",
-      capture_count: 2,
-      summary:
-        "Connecting a client (Claude / Notes) after exposing the hub publicly hits two distinct walls: stale origin-pinned credentials, and Cloudflare bot protection blocking the server-to-server MCP token exchange.",
-    },
-    "# Theme — expose + connect auth friction\n\n_Addressing._ Severity p1.\n\nTwo raw captures feed this:\n\n1. **\"Not signed in to the hub\"** — origin-pinned credentials (vault `.env` hub-origin, operator.token iss) go stale after init-at-loopback → expose-public. Self-heal-on-start shipped (hub#480/#481).\n2. **Cloudflare bot protection** 403s Claude's server-to-server token-exchange + MCP — consent passes in-browser, then \"rejected the credentials,\" nothing in hub.log. Fix is in the operator's CF dashboard (relax Bot Fight Mode), documented at parachute.computer#91.\n\nDrives: [[Work/auth-unification-arc]].",
+  linked(
+    note(
+      "ft-auth-friction",
+      "Feedback/themes/expose-connect-auth-friction",
+      ["feedback-theme"],
+      {
+        status: "addressing",
+        category: "dx-gap",
+        severity: "p1",
+        capture_count: 2,
+        summary:
+          "Connecting a client (Claude / Notes) after exposing the hub publicly hits two distinct walls: stale origin-pinned credentials, and Cloudflare bot protection blocking the server-to-server MCP token exchange.",
+      },
+      "# Theme — expose + connect auth friction\n\n_Addressing._ Severity p1.\n\nTwo raw captures feed this:\n\n1. **\"Not signed in to the hub\"** — origin-pinned credentials (vault `.env` hub-origin, operator.token iss) go stale after init-at-loopback → expose-public. Self-heal-on-start shipped (hub#480/#481).\n2. **Cloudflare bot protection** 403s Claude's server-to-server token-exchange + MCP — consent passes in-browser, then \"rejected the credentials,\" nothing in hub.log. Fix is in the operator's CF dashboard (relax Bot Fight Mode), documented at parachute.computer#91.\n\nDrives: [[Work/auth-unification-arc]].",
+    ),
+    [
+      // OUTBOUND drives → the work arc this theme pushed. Powers the card's
+      // "drives 1" chip + the detail Connections "Drives" group.
+      {
+        sourceId: "ft-auth-friction",
+        targetId: "w-auth-arc",
+        relationship: "drives",
+        targetNote: summary("w-auth-arc", "Work/auth-unification-arc"),
+      },
+      // INBOUND synthesized_from ← the raw captures that fed the theme.
+      // Renders as a "Feeds" group from the theme's side.
+      {
+        sourceId: "fc-not-signed-in",
+        targetId: "ft-auth-friction",
+        relationship: "synthesized_from",
+        sourceNote: summary("fc-not-signed-in", "Feedback/raw/not-signed-in-to-hub"),
+      },
+      {
+        sourceId: "fc-cf-bot",
+        targetId: "ft-auth-friction",
+        relationship: "synthesized_from",
+        sourceNote: summary("fc-cf-bot", "Feedback/raw/cloudflare-bot-blocks-mcp"),
+      },
+    ],
   ),
   note(
     "ft-praise-calm",

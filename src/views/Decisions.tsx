@@ -13,12 +13,19 @@ import {
   decisionTint,
   type DecisionScope,
 } from "../data/schema";
-import { label, fmtDate, noteHref, staggerStyle } from "../lib/format";
+import {
+  countOutboundLinks,
+  fmtDate,
+  label,
+  noteHref,
+  staggerStyle,
+} from "../lib/format";
 
 export function Decisions() {
   const { data, loading, error } = useNotes({
     tag: "decision",
     include_metadata: "true",
+    include_links: "true",
     sort: "-decided_on",
     limit: "500",
   });
@@ -82,6 +89,12 @@ export function Decisions() {
                     {label(d.status)}
                   </Pill>
                   {d.scope && <Pill tint="lavender">{label(d.scope)}</Pill>}
+                  {(() => {
+                    const affects = countOutboundLinks(d.note, "affects");
+                    return affects > 0 ? (
+                      <span className="edge-chip">affects {affects}</span>
+                    ) : null;
+                  })()}
                 </span>
                 {d.summary && <span className="row-summary">{d.summary}</span>}
                 {d.supersededBy && (
