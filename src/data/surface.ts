@@ -28,9 +28,11 @@ import {
 } from "@openparachute/surface-client";
 
 const HUB_URL = "https://our.parachute.computer";
-const VAULT_NAME = "default";
+// Exported so lib/identity.ts can read the same stored token this module
+// writes (loadToken is keyed by app + vault scope).
+export const VAULT_NAME = "default";
 // Must match the factory's internal derivation: slugify("Parachute Brain").
-const APP_NAME = "parachute-brain";
+export const APP_NAME = "parachute-brain";
 // The factory's DCR registration cache key (create-vault-surface.ts).
 const DCR_CACHE_KEY = `parachute_surface_dcr:${APP_NAME}`;
 

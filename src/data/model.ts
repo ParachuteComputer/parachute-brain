@@ -64,7 +64,8 @@ export function titleOf(n: Note): string {
     const tail = n.path.split("/").pop() ?? n.path;
     return tail
       .replace(/\.md$/, "")
-      .replace(/^\d{4}-\d{2}-\d{2}-/, "")
+      // Date prefix, with the optional -HHmm minute stamp quick captures add.
+      .replace(/^\d{4}-\d{2}-\d{2}(?:-\d{4})?-/, "")
       .replace(/[-_]/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }

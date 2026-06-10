@@ -11,6 +11,7 @@ import { addNoteLinks, createNote, updateNote } from "../data/vault";
 import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import type { Proposal } from "../data/schema";
+import { signedInHandle } from "../lib/identity";
 import { label, slugify, staggerStyle, todayISO } from "../lib/format";
 
 type Resolution = "approved" | "rejected";
@@ -115,9 +116,13 @@ export function Weave() {
         // source meeting's path), else today.
         const evDate =
           (p.evidence ?? "").match(/\d{4}-\d{2}-\d{2}/)?.[0] ?? todayISO();
+        // App-layer attribution: the human who approved this into existence
+        // (the proposal itself came from the weave).
+        const author = signedInHandle() ?? "";
         let path = `Entities/${safeName}`;
         let metadata: Record<string, unknown> = {
           summary: resolvedSummary,
+          author,
         };
         // Tags beyond the entity-type tag (tasks also carry the arc's repo
         // tags) + an optional part_of link to wire the new note into the graph.
@@ -186,6 +191,7 @@ export function Weave() {
                 ? m.repo
                 : arcTail.match(/parachute[-.][a-z]+/)?.[0] ?? "";
             path = `Tasks/${arcTail ? slugify(arcTail) + "-" : ""}${slug}`;
+            // NOTE: replaces (not spreads) the base metadata — re-stamp author.
             metadata = {
               goal: name,
               summary: resolvedSummary,
@@ -199,6 +205,7 @@ export function Weave() {
               repo: arcRepo,
               claimed_by: "",
               claim_expires: "",
+              author,
             };
             if (arcRepo) extraTags = [`repo/${arcRepo}`];
             if (arcPath) linkTarget = arcPath;

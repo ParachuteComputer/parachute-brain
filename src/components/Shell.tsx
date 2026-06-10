@@ -1,11 +1,13 @@
 /**
  * The app shell: sticky topbar (dot-logo + wordmark, nav, theme toggle,
- * sign-out) wrapping the routed view. A thin demo banner when in demo mode.
+ * signed-in handle, sign-out) wrapping the routed view. A thin demo banner
+ * when in demo mode.
  */
 import { NavLink, Outlet } from "react-router-dom";
 import { ParachuteLogo } from "./ParachuteLogo";
 import { useTheme } from "./ThemeContext";
 import { useSession } from "../data/SessionContext";
+import { signedInHandle } from "../lib/identity";
 
 // Four job-shaped tabs. The type-views (Decisions / Meetings / Team / Strategy
 // / Modules / Feedback) moved off the top nav and are reached via Library.
@@ -53,6 +55,11 @@ function SignOutIcon() {
 export function Shell() {
   const { theme, toggle } = useTheme();
   const { demo, logout } = useSession();
+  // Quiet chrome, not a feature: the signed-in handle, or nothing. In demo
+  // mode (or when the token is opaque) the chip vanishes — the demo banner
+  // already communicates state. Re-derived per render; the decode is cheap
+  // and the session context re-renders us when sign-in state changes.
+  const handle = demo ? null : signedInHandle();
 
   return (
     <div className="shell">
@@ -86,6 +93,14 @@ export function Shell() {
         </nav>
 
         <div className="topbar-actions">
+          {handle && (
+            <span
+              className="identity-chip mono"
+              title={`Signed in as ${handle}`}
+            >
+              {handle}
+            </span>
+          )}
           <button
             type="button"
             className="icon-btn"

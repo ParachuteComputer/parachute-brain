@@ -17,6 +17,7 @@ import { Loader, ErrorBox, Pill, RepoChip } from "../components/ui";
 import { TaskRow } from "../components/ArcTasks";
 import { PageHeader } from "../components/PageHeader";
 import { NoteBody } from "../components/NoteBody";
+import { QuickCapture } from "../components/QuickCapture";
 import {
   priorityRank,
   priorityTint,
@@ -136,6 +137,9 @@ export function Today() {
         title="Good morning"
         lead="What needs your call, what's next, and what moved overnight — top to bottom."
       />
+
+      {/* 0 — Quick capture: drop a thought before reading anything --------- */}
+      <QuickCapture />
 
       {/* 1 — Waiting on you ------------------------------------------------ */}
       <section className="section">

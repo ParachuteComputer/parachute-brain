@@ -242,6 +242,16 @@ kbd,
   flex-shrink: 0;
 }
 
+/* The signed-in handle — quiet chrome, not a feature. Dim mono next to the
+   sign-out control; absent entirely in demo mode / when the token is opaque. */
+.identity-chip {
+  font-size: 0.72rem;
+  color: var(--fg-dim);
+  letter-spacing: 0.02em;
+  padding: 0 6px;
+  white-space: nowrap;
+}
+
 .main {
   flex: 1;
   width: 100%;
@@ -1095,6 +1105,91 @@ button.row {
 }
 
 /* --- Home: the morning brief ---------------------------------------------- */
+
+/* Quick capture — a calm, slim drop-a-thought affordance under the page
+   header. A single line at rest; breathes open into a textarea on focus.
+   Deliberately quieter than the decision cards below it. */
+.quick-capture {
+  margin: -14px 0 44px;
+}
+.quick-capture-input {
+  width: 100%;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-card);
+  padding: 13px 18px;
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  line-height: 1.55;
+  color: var(--fg);
+  box-shadow: var(--shadow-rest);
+  transition: border-color var(--ease), box-shadow var(--ease);
+}
+.quick-capture-input::placeholder {
+  color: var(--fg-dim);
+}
+.quick-capture-input:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+textarea.quick-capture-input {
+  display: block;
+  min-height: 96px;
+  resize: vertical;
+}
+.quick-capture-foot {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 10px;
+}
+.quick-capture-hint {
+  font-size: 0.78rem;
+  color: var(--fg-dim);
+  margin-right: auto;
+}
+.quick-capture-hint kbd {
+  font-size: 0.72rem;
+  padding: 1px 5px;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--bg-soft);
+  margin-right: 2px;
+}
+.quick-capture-error {
+  color: var(--tint-terracotta-fg);
+}
+/* "Captured ✓" — appears, holds, then fades; QuickCapture removes the node
+   onAnimationEnd. Never navigates: the link is there if you want it. */
+.quick-capture-done {
+  margin-top: 10px;
+  font-size: 0.85rem;
+  color: var(--tint-forest-fg);
+  animation: quick-capture-done 6s ease both;
+}
+.quick-capture-done-link {
+  color: var(--accent);
+  text-decoration: underline;
+  text-decoration-color: var(--border);
+  text-underline-offset: 2px;
+}
+@keyframes quick-capture-done {
+  0% {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  6% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+  }
+}
 
 /* A calm, low-key empty line — used for "Nothing needs your call right now."
    and the Focus runway. Quiet on purpose: an absence shouldn't shout. */

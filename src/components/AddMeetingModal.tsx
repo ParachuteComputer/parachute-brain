@@ -17,6 +17,7 @@ import {
 import { createPortal } from "react-dom";
 import { createNote, isDemo } from "../data/vault";
 import { MEETING_SERIES } from "../data/schema";
+import { signedInHandle } from "../lib/identity";
 import { label, slugify, todayISO } from "../lib/format";
 
 export function AddMeetingModal({
@@ -83,18 +84,21 @@ export function AddMeetingModal({
       const slug = slugify(title, "meeting");
       const meetingPath = `Meetings/${date}-${slug}`;
       const transcriptPath = `${meetingPath}/transcript`;
+      // App-layer attribution: stamp who brought this in (no native author
+      // column yet; "" when the handle can't be derived).
+      const author = signedInHandle() ?? "";
       // The raw transcript first — a sacred capture, verbatim.
       await createNote({
         path: transcriptPath,
         tags: ["capture/text"],
         content: transcript,
-        metadata: { source: "paste" },
+        metadata: { source: "paste", author },
       });
       // Then the meeting container, wikilinking the transcript.
       await createNote({
         path: meetingPath,
         tags: ["meeting"],
-        metadata: { series, held_on: date, status: "held", summary: "" },
+        metadata: { series, held_on: date, status: "held", summary: "", author },
         content: `# ${title.trim()}\n\n_${label(series)} — ${date}._ Transcript: [[${transcriptPath}]]\n\n*(Awaiting the weave digest.)*\n`,
       });
       onCreated(meetingPath);

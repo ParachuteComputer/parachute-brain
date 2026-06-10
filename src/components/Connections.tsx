@@ -36,6 +36,7 @@ const REL_LABELS: Record<string, [string, string]> = {
   supersedes: ["Supersedes", "Superseded by"],
   superseded_by: ["Superseded by", "Supersedes"],
   "reported-by": ["Reported by", "Reported"],
+  "captured-by": ["Captured by", "Captured"],
   follows: ["Follows", "Followed by"],
   founder: ["Founder of", "Founder"],
   wikilink: ["Related", "Related"],
