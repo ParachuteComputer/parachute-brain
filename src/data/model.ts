@@ -64,8 +64,11 @@ export function titleOf(n: Note): string {
     const tail = n.path.split("/").pop() ?? n.path;
     return tail
       .replace(/\.md$/, "")
-      // Date prefix, with the optional -HHmm minute stamp quick captures add.
-      .replace(/^\d{4}-\d{2}-\d{2}(?:-\d{4})?-/, "")
+      // Date prefix, with the optional -HHmm / -HHmmss stamp quick captures
+      // add. The optional group is for TIME stamps only — a purely numeric
+      // 4–6 digit segment right after the date (e.g. -1418, -141832). A
+      // version-like segment ("0.6.0") has dots so it never matches.
+      .replace(/^\d{4}-\d{2}-\d{2}(?:-\d{4}(?:\d{2})?)?-/, "")
       .replace(/[-_]/g, " ")
       .replace(/\b\w/g, (c) => c.toUpperCase());
   }

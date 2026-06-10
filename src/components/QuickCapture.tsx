@@ -18,13 +18,18 @@ import { toPerson } from "../data/model";
 import { signedInHandle } from "../lib/identity";
 import { noteHref, slugify } from "../lib/format";
 
-/** Local wall-clock stamp for capture paths: YYYY-MM-DD-HHmm. */
+/**
+ * Local wall-clock stamp for capture paths: YYYY-MM-DD-HHmmss. Seconds keep
+ * two rapid captures with the same opening words from colliding on one path
+ * (the vault rejects a duplicate path; the error surfaces, nothing is lost —
+ * this just makes the window practically zero).
+ */
 function localStamp(): string {
   const d = new Date();
   const p = (n: number) => String(n).padStart(2, "0");
   return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}-${p(
     d.getHours(),
-  )}${p(d.getMinutes())}`;
+  )}${p(d.getMinutes())}${p(d.getSeconds())}`;
 }
 
 /**
