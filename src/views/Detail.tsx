@@ -126,6 +126,7 @@ function MetaPanel({ note, tag }: { note: Note; tag: string }) {
   if (tag === "person") return <PersonMeta note={note} />;
   if (tag === "org") return <OrgMeta note={note} />;
   if (tag === "proposal") return <ProposalMeta note={note} />;
+  if (tag.startsWith("capture")) return <CaptureMeta note={note} />;
   if (tag.startsWith("feedback")) return <FeedbackMeta note={note} />;
   return null;
 }
@@ -324,6 +325,29 @@ function ProposalMeta({ note }: { note: Note }) {
         {typeof p.confidence === "number" && (
           <KV k="confidence" v={`${Math.round(p.confidence * 100)}%`} />
         )}
+      </div>
+    </Block>
+  );
+}
+
+/**
+ * Capture meta — deliberately small. A dim "by <author>" line (the app-layer
+ * attribution stamp) plus the source/reporter when present. The rich path is
+ * the Connections panel's "Captured by" link to the person's roster note.
+ */
+function CaptureMeta({ note }: { note: Note }) {
+  const m = note.metadata ?? {};
+  const author = typeof m.author === "string" && m.author ? m.author : null;
+  const reporter =
+    typeof m.reporter === "string" && m.reporter ? m.reporter : null;
+  const source = typeof m.source === "string" && m.source ? m.source : null;
+  if (!author && !reporter && !source) return null;
+  return (
+    <Block title="Capture">
+      <div className="meta-kv">
+        {author && <KV k="by" v={<span className="dim">{author}</span>} />}
+        {reporter && <KV k="reporter" v={reporter} />}
+        {source && <KV k="source" v={<span className="mono">{source}</span>} />}
       </div>
     </Block>
   );

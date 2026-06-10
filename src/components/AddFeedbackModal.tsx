@@ -20,6 +20,7 @@ import { addNoteLinks, createNote, isDemo, queryNotes } from "../data/vault";
 import { toPerson } from "../data/model";
 import type { Person } from "../data/schema";
 import { FEEDBACK_SOURCES } from "../data/schema";
+import { signedInHandle } from "../lib/identity";
 import { label, slugify, todayISO } from "../lib/format";
 
 export function AddFeedbackModal({
@@ -111,6 +112,9 @@ export function AddFeedbackModal({
     setError(null);
     try {
       const date = todayISO();
+      // App-layer attribution: who brought this in (distinct from the
+      // reporter — the author is the signed-in team member doing the intake).
+      const author = signedInHandle() ?? "";
       // Match the roster, or create the person (relation: user — per the
       // team philosophy, and these are by definition users reaching out).
       const matched = matchPerson(name);
@@ -126,6 +130,7 @@ export function AddFeedbackModal({
             role: "",
             handle: "",
             summary: `Added via feedback intake, ${date}.`,
+            author,
           },
           content: `# ${name}\n\n(Added via feedback intake, ${date}.)`,
         });
@@ -137,7 +142,7 @@ export function AddFeedbackModal({
         path: capPath,
         tags: ["capture/feedback"],
         content,
-        metadata: { source, reporter: name },
+        metadata: { source, reporter: name, author },
       });
       try {
         await addNoteLinks(cap.id, [

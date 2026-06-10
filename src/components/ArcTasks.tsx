@@ -14,6 +14,7 @@ import { Link } from "react-router-dom";
 import type { Note } from "@openparachute/surface-client";
 import { addNoteLinks, createNote, isDemo, queryNotes, updateNote } from "../data/vault";
 import { reposOf, toTask } from "../data/model";
+import { signedInHandle } from "../lib/identity";
 import { Pill } from "./ui";
 import {
   priorityTint,
@@ -351,6 +352,8 @@ function AddTaskForm({
           repo: primaryRepo,
           claimed_by: "",
           claim_expires: "",
+          // App-layer attribution (no native author column yet).
+          author: signedInHandle() ?? "",
         },
         content: `# ${goal.trim()}\n\n## Goal\n${goal.trim()}\n## Definition of done\n${dod.trim()}\n## Next action\n${nextAction.trim()}\n`,
       });

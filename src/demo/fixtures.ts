@@ -55,20 +55,44 @@ function linked(n: Note, links: NoteLink[]): Note {
 // ---------------------------------------------------------------- People ----
 
 export const PEOPLE: Note[] = [
-  note(
-    "p-aaron",
-    "People/Aaron Gabriel Neyer",
-    ["person"],
-    {
-      relation: "core-team",
-      role: "founder",
-      handle: "aaron",
-      contact: "ag@unforced.org",
-      summary:
-        "Founder. Builds the Parachute ecosystem end to end — vault, hub, the whole orchestration model. Runs Uni (UnforcedAGI) as an extension of his own intelligence.",
-      aliases: ["Aaron", "AG"],
-    },
-    "# Aaron Gabriel Neyer\n\nFounder of Parachute. Architect of the vault-as-substrate model and the hub-as-portal OAuth design. Sets the calm, crafted bar for the whole product surface.",
+  linked(
+    note(
+      "p-aaron",
+      "People/Aaron Gabriel Neyer",
+      ["person"],
+      {
+        relation: "core-team",
+        role: "founder",
+        handle: "aaron",
+        contact: "ag@unforced.org",
+        summary:
+          "Founder. Builds the Parachute ecosystem end to end — vault, hub, the whole orchestration model. Runs Uni (UnforcedAGI) as an extension of his own intelligence.",
+        aliases: ["Aaron", "AG"],
+      },
+      "# Aaron Gabriel Neyer\n\nFounder of Parachute. Architect of the vault-as-substrate model and the hub-as-portal OAuth design. Sets the calm, crafted bar for the whole product surface.",
+    ),
+    [
+      // INBOUND captured-by ← quick captures stamped to this person. Renders
+      // as the detail Connections "Captured" group (the person's side).
+      {
+        sourceId: "c-pebble-weave",
+        targetId: "p-aaron",
+        relationship: "captured-by",
+        sourceNote: summary(
+          "c-pebble-weave",
+          "Captures/2026-06-01-1418-pebble-capture-could-feed-the-weave",
+        ),
+      },
+      {
+        sourceId: "c-capture-feel",
+        targetId: "p-aaron",
+        relationship: "captured-by",
+        sourceNote: summary(
+          "c-capture-feel",
+          "Captures/2026-06-02-0855-the-quick-capture-box-should-feel",
+        ),
+      },
+    ],
   ),
   note(
     "p-jonbo",
@@ -789,6 +813,52 @@ export const FEEDBACK_CAPTURES: Note[] = [
   ),
 ];
 
+// -------------------------------------------------------------- Captures ----
+// Quick-capture thoughts (the Home capture box → Captures/<stamp>-<slug>).
+// Verbatim `capture/text`, stamped with the app-layer author convention +
+// a captured-by link to the person's roster note.
+
+export const CAPTURES: Note[] = [
+  linked(
+    note(
+      "c-pebble-weave",
+      "Captures/2026-06-01-1418-pebble-capture-could-feed-the-weave",
+      ["capture/text"],
+      { author: "aaron", source: "brain-quick-capture" },
+      "Pebble capture could feed the weave directly — 15s of watch dictation is enough for a seed thought. The training-wheels version is just capture/text with a source tag; the morning weave does the rest.",
+      "2026-06-01T14:18:00Z",
+    ),
+    [
+      // OUTBOUND captured-by → the author's roster note. Renders as the
+      // capture detail's "Captured by" Connections group.
+      {
+        sourceId: "c-pebble-weave",
+        targetId: "p-aaron",
+        relationship: "captured-by",
+        targetNote: summary("p-aaron", "People/Aaron Gabriel Neyer"),
+      },
+    ],
+  ),
+  linked(
+    note(
+      "c-capture-feel",
+      "Captures/2026-06-02-0855-the-quick-capture-box-should-feel",
+      ["capture/text"],
+      { author: "aaron", source: "brain-quick-capture" },
+      "The quick-capture box should feel like breathing out — type, ⌘↩, gone. If dropping a thought takes more than five seconds we built the wrong thing.",
+      "2026-06-02T08:55:00Z",
+    ),
+    [
+      {
+        sourceId: "c-capture-feel",
+        targetId: "p-aaron",
+        relationship: "captured-by",
+        targetNote: summary("p-aaron", "People/Aaron Gabriel Neyer"),
+      },
+    ],
+  ),
+];
+
 // ------------------------------------------------------------- Proposals ----
 
 export const PROPOSALS: Note[] = [
@@ -1059,6 +1129,7 @@ export const ALL_NOTES: Note[] = [
   ...MEETINGS,
   ...FEEDBACK_THEMES,
   ...FEEDBACK_CAPTURES,
+  ...CAPTURES,
   ...PROPOSALS,
   ...DAILY,
   ...MODULES,
