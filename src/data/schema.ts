@@ -152,6 +152,7 @@ export const REPOS = [
   "parachute.computer",
   "parachute-brain",
   "parachute-workspace",
+  "parachute-channel",
 ] as const;
 export type Repo = (typeof REPOS)[number];
 
@@ -585,6 +586,7 @@ const REPO_COLORS: Record<Repo, string> = {
   "parachute.computer": "#6b7a9e",
   "parachute-brain": "#8a6e5a",
   "parachute-workspace": "#6e7a8a",
+  "parachute-channel": "#7a6e9e",
 };
 export function repoColor(repo: string): string {
   return (REPO_COLORS as Record<string, string>)[repo] ?? "#9a9690";

@@ -12,7 +12,13 @@ import { Loader, Empty, ErrorBox, Pill } from "../components/ui";
 import { PageHeader } from "../components/PageHeader";
 import type { Proposal } from "../data/schema";
 import { signedInHandle } from "../lib/identity";
-import { label, slugify, staggerStyle, todayISO } from "../lib/format";
+import {
+  deriveRepoSlugs,
+  label,
+  slugify,
+  staggerStyle,
+  todayISO,
+} from "../lib/format";
 
 type Resolution = "approved" | "rejected";
 
@@ -76,7 +82,9 @@ export function Weave() {
     setResolved((r) => ({ ...r, [p.id]: resolution }));
     try {
       if (resolution === "approved" && p.kind === "entity") {
-        // Create the proposed entity at its conventional home with explicit,
+        // Create the proposed entity at the proposal's `target_path` (the
+        // weaver's per-conventions destination — verbatim), falling back to
+        // the per-type conventional home only when absent, with explicit,
         // honest metadata. NOTE: the vault fills FIRST-enum defaults for any
         // absent enum field (a person once landed "core-team / founder") —
         // blank beats wrong, so unknowns are set to "" deliberately and show
@@ -119,6 +127,12 @@ export function Weave() {
         // App-layer attribution: the human who approved this into existence
         // (the proposal itself came from the weave).
         const author = signedInHandle() ?? "";
+        // The weaver writes `target_path` per the vault's conventions — when
+        // present it IS the destination, verbatim. The per-type paths below
+        // are only the fallback for proposals that don't carry one (issue #16:
+        // an apply that re-derived paths from entity_name scattered notes).
+        const targetPath =
+          typeof m.target_path === "string" ? m.target_path.trim() : "";
         let path = `Entities/${safeName}`;
         let metadata: Record<string, unknown> = {
           summary: resolvedSummary,
@@ -140,15 +154,24 @@ export function Weave() {
             break;
           case "work":
             path = `Work/${slug}`;
+            // A weave-proposed work item is an arc-level plan entering the
+            // funnel — NOT a task (issue #16: "kind: task" misfiled four
+            // arc-level approvals). inbox/next = newly arrived, queued up.
             metadata = {
               ...metadata,
-              kind: "task",
+              kind: "plan",
               status: "inbox",
-              priority: "",
+              priority: "next",
               assignee: "",
               target: "",
               gh_links: [],
             };
+            // repo/<slug> tags only when the proposal explicitly names a
+            // repo (in its target_path or evidence) — never inferred from
+            // loose prose. Absent mentions simply mean no repo tags.
+            extraTags = deriveRepoSlugs(
+              `${targetPath} ${p.evidence ?? ""}`,
+            ).map((r) => `repo/${r}`);
             break;
           case "decision":
             path = `Decisions/${evDate}-${slug}`;
@@ -171,11 +194,13 @@ export function Weave() {
             break;
           case "feedback-theme":
             path = `Feedback/themes/${slug}`;
+            // Carry category/severity when the proposal supplies them;
+            // otherwise blank (needs-triage) beats a guessed enum value.
             metadata = {
               ...metadata,
               status: "open",
-              category: "",
-              severity: "",
+              category: typeof m.category === "string" ? m.category : "",
+              severity: typeof m.severity === "string" ? m.severity : "",
             };
             break;
           case "task": {
@@ -212,6 +237,10 @@ export function Weave() {
             break;
           }
         }
+        // The proposal's explicit destination always wins — for EVERY entity
+        // type, including ones this switch doesn't know yet. Traversal guard
+        // is defense-in-depth (the weaver is trusted; the vault validates).
+        if (targetPath && !targetPath.includes("..")) path = targetPath;
         const created = await createNote({
           content: [
             `# ${name}`,
@@ -224,6 +253,13 @@ export function Weave() {
           tags: [p.entityType ?? "entity", ...extraTags],
           metadata,
         });
+        // Audit line: the apply is the deterministic half of the govern loop,
+        // so make what it actually wrote inspectable (issue #16 was caught a
+        // day late precisely because the writes were silent).
+        console.info(
+          `[weave] applied ${p.id} → ${created.path}`,
+          { tags: [p.entityType ?? "entity", ...extraTags], link: linkTarget },
+        );
         if (linkTarget) {
           try {
             await addNoteLinks(created.id, [

@@ -96,15 +96,57 @@ export function ghLinkUrl(token: string): string {
   return num ? `${base}/issues/${num}` : base;
 }
 
-/** Kebab slug for note paths (shared by meeting intake + the weave apply). */
+/**
+ * Kebab slug for note paths (shared by meeting intake + the weave apply).
+ *
+ * Capped at ~8 words / ~60 chars, always cutting at a word boundary — a long
+ * title must never truncate mid-word (issue #16: a weave apply once minted
+ * `...-team-vault-site-as-sur`). The only mid-word cut left is the degenerate
+ * single-token-over-60-chars case, where no boundary exists to cut at.
+ */
 export function slugify(s: string, fallback = "note"): string {
-  return (
-    s
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/^-+|-+$/g, "")
-      .slice(0, 60) || fallback
-  );
+  const words = s
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .split("-")
+    .filter(Boolean);
+  const kept: string[] = [];
+  for (const w of words) {
+    if (kept.length >= 8) break;
+    if (kept.length > 0 && kept.join("-").length + 1 + w.length > 60) break;
+    kept.push(w);
+  }
+  return kept.join("-").slice(0, 60) || fallback;
+}
+
+/**
+ * Repo slugs EXPLICITLY mentioned in a blob of text (a proposal's target_path
+ * + evidence) — the conservative input to the weave apply's `repo/<slug>`
+ * tagging. Two explicit forms only, both validated against the known repo set:
+ *
+ *  - full repo names: "parachute-vault", "parachute.computer"
+ *  - gh-link tokens:  "hub#480", "vault#412" (the `gh_links` shorthand)
+ *
+ * Prose words like "hub" or "site" alone never match — deriving a repo from
+ * loose prose is exactly the over-inference the apply must not do.
+ */
+export function deriveRepoSlugs(text: string): string[] {
+  const known = new Set(Object.values(GH_SLUG_MAP));
+  const found = new Set<string>();
+  for (const full of known) {
+    // Word-boundary match so "parachute-surface" doesn't fire on
+    // "parachute-surface-client" (the npm package, not the repo).
+    const re = new RegExp(
+      `(?<![a-z0-9-])${full.replace(".", "\\.")}(?![a-z0-9-])`,
+    );
+    if (re.test(text)) found.add(full);
+  }
+  for (const m of text.matchAll(/\b([a-z]+)#\d+/g)) {
+    const full = GH_SLUG_MAP[m[1] ?? ""];
+    if (full) found.add(full);
+  }
+  return [...found].sort();
 }
 
 /**
