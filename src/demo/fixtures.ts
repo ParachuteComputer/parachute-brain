@@ -860,8 +860,77 @@ export const CAPTURES: Note[] = [
 ];
 
 // ------------------------------------------------------------- Proposals ----
+// The three weave-demo-* proposals are the approve-apply's fixture tests
+// (issue #16). Approving them in ?demo=1 must log (see the [weave] console
+// line) exactly:
+//   weave-demo-1 → Work/vault-content-pagination   (target_path, verbatim)
+//   weave-demo-2 → Work/scoped-start-page          (no target_path → slug)
+//   weave-demo-3 → Work/parachute-computer-generated-from-the-team-vault-site
+//                                                  (capped, never mid-word)
 
 export const PROPOSALS: Note[] = [
+  note(
+    "prop-work-pagination",
+    "Proposals/weave-demo-1",
+    ["proposal"],
+    {
+      status: "pending",
+      kind: "entity",
+      entity_type: "work",
+      entity_name: "Content pagination — chunked reads for MCP clients",
+      entity_summary:
+        "Large notes (meeting transcripts) overflow MCP client context windows; add chunked/paginated reads to the vault API so clients pull long notes in slices.",
+      target_path: "Work/vault-content-pagination",
+      confidence: 0.85,
+      evidence:
+        "\"the transcript blew past the context window again\" — recurring across parachute-vault MCP sessions (Meetings/2026-05-26-parachute-weekly-sync).",
+      run: "weave-demo",
+      summary:
+        "Work: content pagination for MCP clients. Carries a target_path — the apply must land exactly there.",
+    },
+    "# Proposal — work: content pagination\n\nCarries an explicit `target_path` (`Work/vault-content-pagination`) written per the vault's conventions. The apply must create the note exactly there — never re-derive the path from the name.\n\n**Confidence:** 0.85",
+  ),
+  note(
+    "prop-work-start-page",
+    "Proposals/weave-demo-2",
+    ["proposal"],
+    {
+      status: "pending",
+      kind: "entity",
+      entity_type: "work",
+      entity_name: "Scoped start page",
+      entity_summary:
+        "A single, simple /start page — a sales funnel (hello / your section / community) — to replace the confusing current site as the onboarding entry point.",
+      confidence: 0.9,
+      evidence:
+        "\"trying to make like literally parachute.computer slash start... super simple text... it's a sales funnel\" (Meetings/2026-06-02-parachute-weekly-sync).",
+      run: "weave-demo",
+      summary:
+        "Work: /start page. No target_path — the apply falls back to the conventional Work/<slug>.",
+    },
+    "# Proposal — work: scoped /start page\n\nNo `target_path` on this one: the apply falls back to the conventional `Work/scoped-start-page`. The evidence names parachute.computer explicitly, so the apply also derives the `repo/parachute.computer` tag.\n\n**Confidence:** 0.9",
+  ),
+  note(
+    "prop-work-site-from-vault",
+    "Proposals/weave-demo-3",
+    ["proposal"],
+    {
+      status: "pending",
+      kind: "entity",
+      entity_type: "work",
+      entity_name:
+        "Parachute Computer, generated from the team vault — site as surface over living notes",
+      entity_summary:
+        "Generate the public site from the team vault itself — the site as a surface over living notes, not a parallel artifact to keep in sync.",
+      confidence: 0.7,
+      evidence:
+        "Long-named proposals once slugged the whole name and truncated mid-word at 60 chars — `...-team-vault-site-as-sur` (issue #16). The slug must cut at a word boundary.",
+      run: "weave-demo",
+      summary:
+        "Work: long entity_name, no target_path — the capped slug must never cut mid-word.",
+    },
+    "# Proposal — work: site generated from the vault\n\nThe long-name regression case: no `target_path`, an entity_name well past the slug cap. The apply must cap the slug at a word boundary — `parachute-computer-generated-from-the-team-vault-site` — never `...-site-as-sur`.\n\n**Confidence:** 0.7",
+  ),
   note(
     "prop-jess",
     "Proposals/person-jess-klein",
