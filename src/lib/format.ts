@@ -135,7 +135,12 @@ export function deriveRepoSlugs(text: string): string[] {
   const known = new Set(Object.values(GH_SLUG_MAP));
   const found = new Set<string>();
   for (const full of known) {
-    if (text.includes(full)) found.add(full);
+    // Word-boundary match so "parachute-surface" doesn't fire on
+    // "parachute-surface-client" (the npm package, not the repo).
+    const re = new RegExp(
+      `(?<![a-z0-9-])${full.replace(".", "\\.")}(?![a-z0-9-])`,
+    );
+    if (re.test(text)) found.add(full);
   }
   for (const m of text.matchAll(/\b([a-z]+)#\d+/g)) {
     const full = GH_SLUG_MAP[m[1] ?? ""];

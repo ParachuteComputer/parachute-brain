@@ -238,8 +238,9 @@ export function Weave() {
           }
         }
         // The proposal's explicit destination always wins — for EVERY entity
-        // type, including ones this switch doesn't know yet.
-        if (targetPath) path = targetPath;
+        // type, including ones this switch doesn't know yet. Traversal guard
+        // is defense-in-depth (the weaver is trusted; the vault validates).
+        if (targetPath && !targetPath.includes("..")) path = targetPath;
         const created = await createNote({
           content: [
             `# ${name}`,
